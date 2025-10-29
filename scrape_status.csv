@@ -1,0 +1,15 @@
+﻿Site,Status,ArticlesFound
+Ancon,success,9
+nVent LENTON,success,11
+Dywidag,success,12
+Anker Schroeder,success,15
+SAH Annahutte,success,9
+Moment,success,45
+Macalloy,success,20
+Williams Form,success,10
+FiReP Minova,success,44
+MST Bar,"error: Playwright is required. Install with:
+  pip install playwright
+  playwright install",0
+Mateenbar Pultron,success,23
+nmb splice sleeve,success,8
