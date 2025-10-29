@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Brand Rail</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{
+      --logo-w:160px;               /* auto-fitted; override via ?size= */
+      --page-bg:transparent;        /* set via ?theme=teal to #003143 */
+      --shell-bg:rgba(255,255,255,.78);
+      --accent-a:#1e40af;           /* header blue */
+      --accent-b:#10b981;           /* header green */
+    }
+    html,body{height:100%}
+    body{margin:0;background:var(--page-bg)}
+    .scrollbar-hide::-webkit-scrollbar{display:none}
+    .scrollbar-hide{-ms-overflow-style:none;scrollbar-width:none}
+
+    .rail-wrap{height:100%;padding:6px 12px 10px;box-sizing:border-box}
+    .rail-accent{
+      height:4px;width:100%;border-radius:8px 8px 0 0;
+      background:linear-gradient(90deg,var(--accent-a),var(--accent-b));
+      opacity:.9;box-shadow:0 2px 6px rgba(0,0,0,.08)
+    }
+    .rail-shell{
+      height:calc(100% - 6px);padding:10px;background:var(--shell-bg);
+      backdrop-filter:blur(4px);border-radius:0 0 14px 14px;
+      box-shadow:0 10px 30px rgba(0,0,0,.08);
+      border:1px solid rgba(255,255,255,.25)
+    }
+
+    .brand-card{padding:8px}
+    .dx-logo-frame{
+      width:var(--logo-w);aspect-ratio:16/9;background:#fff;border-radius:14px;
+      box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;overflow:hidden
+    }
+    .dx-logo-frame img{max-width:92%;max-height:92%;object-fit:contain;display:block}
+  </style>
+</head>
+<body>
+  <div class="rail-wrap">
+    <div class="rail-accent"></div>
+    <div class="rail-shell">
+      <div id="rail" class="flex items-center h-full gap-5 overflow-x-auto scrollbar-hide">
+
+        <!-- Leviat MOMENT -->
+        <a href="https://dextranet.sharepoint.com/sites/CompetitorsWatch/SitePages/b1.aspx"
+           target="_top" data-brand="Leviat MOMENT"
+           class="brand-card group relative flex-shrink-0 rounded-2xl transition-all duration-300 hover:scale-105 hover:-translate-y-1 bg-white/60 backdrop-blur-sm border border-gray-200/50 hover:bg-white/80 hover:shadow-lg">
+          <div class="relative">
+            <div class="dx-logo-frame">
+              <img src="https://raw.githubusercontent.com/jumpbcc158/Logos/main/DYWIDAG_16x9.png" alt="Leviat MOMENT" />
+            </div>
+            <div class="active-overlay absolute -inset-1 rounded-xl bg-gradient-to-r from-blue-500 to-green-500 opacity-0 transition-opacity duration-300 pointer-events-none"></div>
+          </div>
+          <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/0 via-green-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:via-green-500/5 group-hover:to-blue-500/5 transition-all duration-300 pointer-events-none"></div>
+        </a>
+
+        <!-- Leviat Ancon -->
+        <a href="https://dextranet.sharepoint.com/sites/CompetitorsWatch/SitePages/b2.aspx"
+           target="_top" data-brand="Leviat Ancon"
+           class="brand-card group relative flex-shrink-0 rounded-2xl transition-all duration-300 hover:scale-105 hover:-translate-y-1 bg-white/60 backdrop-blur-sm border border-gray-200/50 hover:bg-white/80 hover:shadow-lg">
+          <div class="relative">
+            <div class="dx-logo-frame">
+              <img src="https://raw.githubusercontent.com/jumpbcc158/Logos/main/Anker_Schroeder_16x9.png" alt="Leviat Ancon" />
+            </div>
+            <div class="active-overlay absolute -inset-1 rounded-xl bg-gradient-to-r from-blue-500 to-green-500 opacity-0 transition-opacity duration-300 pointer-events-none"></div>
+          </div>
+          <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/0 via-green-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:via-green-500/5 group-hover:to-blue-500/5 transition-all duration-300 pointer-events-none"></div>
+        </a>
+
+        <!-- nVent LENTON -->
+        <a href="https://dextranet.sharepoint.com/sites/CompetitorsWatch/SitePages/b3.aspx"
+           target="_top" data-brand="nVent LENTON"
+           class="brand-card group relative flex-shrink-0 rounded-2xl transition-all duration-300 hover:scale-105 hover:-translate-y-1 bg-white/60 backdrop-blur-sm border border-gray-200/50 hover:bg-white/80 hover:shadow-lg">
+          <div class="relative">
+            <div class="dx-logo-frame">
+              <img src="https://raw.githubusercontent.com/jumpbcc158/Logos/main/Macalloy_16x9.png" alt="nVent LENTON" />
+            </div>
+            <div class="active-overlay absolute -inset-1 rounded-xl bg-gradient-to-r from-blue-500 to-green-500 opacity-0 transition-opacity duration-300 pointer-events-none"></div>
+          </div>
+          <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/0 via-green-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:via-green-500/5 group-hover:to-blue-500/5 transition-all duration-300 pointer-events-none"></div>
+        </a>
+
+        <!-- NMB Splice Sleeve -->
+        <a href="https://dextranet.sharepoint.com/sites/CompetitorsWatch/SitePages/b4.aspx"
+           target="_top" data-brand="NMB Splice Sleeve"
+           class="brand-card group relative flex-shrink-0 rounded-2xl transition-all duration-300 hover:scale-105 hover:-translate-y-1 bg-white/60 backdrop-blur-sm border border-gray-200/50 hover:bg-white/80 hover:shadow-lg">
+          <div class="relative">
+            <div class="dx-logo-frame">
+              <img src="https://raw.githubusercontent.com/jumpbcc158/Logos/main/Williams_Form_16x9.png" alt="NMB Splice Sleeve" />
+            </div>
+            <div class="active-overlay absolute -inset-1 rounded-xl bg-gradient-to-r from-blue-500 to-green-500 opacity-0 transition-opacity duration-300 pointer-events-none"></div>
+          </div>
+          <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/0 via-green-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:via-green-500/5 group-hover:to-blue-500/5 transition-all duration-300 pointer-events-none"></div>
+        </a>
+
+        <!-- Boowon BMS -->
+        <a href="https://dextranet.sharepoint.com/sites/CompetitorsWatch/SitePages/b5.aspx"
+           target="_top" data-brand="Boowon BMS"
+           class="brand-card group relative flex-shrink-0 rounded-2xl transition-all duration-300 hover:scale-105 hover:-translate-y-1 bg-white/60 backdrop-blur-sm border border-gray-200/50 hover:bg-white/80 hover:shadow-lg">
+          <div class="relative">
+            <div class="dx-logo-frame">
+              <img src="https://raw.githubusercontent.com/jumpbcc158/Logos/main/SAH_Stahlwerk_Annahutte_16x9.png" alt="Boowon BMS" />
+            </div>
+            <div class="active-overlay absolute -inset-1 rounded-xl bg-gradient-to-r from-blue-500 to-green-500 opacity-0 transition-opacity duration-300 pointer-events-none"></div>
+          </div>
+          <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/0 via-green-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:via-green-500/5 group-hover:to-blue-500/5 transition-all duration-300 pointer-events-none"></div>
+        </a>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const qs = new URLSearchParams(location.search);
+
+      // Theme switch: default blends under header; ?theme=teal shows #003143 strip
+      const theme = (qs.get('theme') || '').toLowerCase();
+      if (theme === 'teal') {
+        document.documentElement.style.setProperty('--page-bg', '#003143');
+        document.documentElement.style.setProperty('--shell-bg', 'rgba(255,255,255,.80)');
+      }
+
+      // Manual logo size override: ?size=120..320
+      const forced = parseInt(qs.get('size'), 10);
+
+      function fitByHeight() {
+        if (Number.isFinite(forced)) {
+          document.documentElement.style.setProperty('--logo-w', forced + 'px');
+          return;
+        }
+        const rail = document.getElementById('rail');
+        const railH = rail?.clientHeight || window.innerHeight || 140;
+        const usableH = Math.max(64, railH - 32);
+        const logoW = Math.min(320, Math.round((usableH * 16) / 9));
+        document.documentElement.style.setProperty('--logo-w', logoW + 'px');
+      }
+
+      const norm = s => decodeURIComponent(String(s || '').toLowerCase().trim());
+
+      // --- AUTO-DETECT ACTIVE BRAND ---
+      function detectActiveBrand() {
+        // 1) explicit ?brand= takes priority
+        const viaParam = norm(qs.get('brand'));
+        if (viaParam) return viaParam;
+
+        // 2) try to match parent page (referrer) to any card href (filename or full path)
+        const ref = document.referrer || '';
+        if (!ref) return '';
+        try {
+          const refUrl = new URL(ref);
+          const refPath = (refUrl.pathname || '').toLowerCase();   // e.g. /.../c3.aspx
+          const refFile = refPath.split('/').pop();
+          let found = '';
+          document.querySelectorAll('.brand-card').forEach(card => {
+            const cardUrl = new URL(card.getAttribute('href'), refUrl.origin);
+            const cardPath = cardUrl.pathname.toLowerCase();
+            const cardFile = cardPath.split('/').pop();
+            if (refPath === cardPath || refFile === cardFile) {
+              found = norm(card.dataset.brand);
+            }
+          });
+          return found;
+        } catch { return ''; }
+      }
+
+      const activeBrand = detectActiveBrand();
+
+      // Apply highlight
+      document.querySelectorAll('.brand-card').forEach(card => {
+        const isActive = activeBrand && norm(card.dataset.brand) === activeBrand;
+        const overlay = card.querySelector('.active-overlay');
+        card.classList.toggle('bg-gradient-to-br', isActive);
+        card.classList.toggle('from-blue-500/10', isActive);
+        card.classList.toggle('to-green-500/10', isActive);
+        card.classList.toggle('border-2', isActive);
+        card.classList.toggle('border-blue-400/50', isActive);
+        card.classList.toggle('shadow-xl', isActive);
+        card.classList.toggle('shadow-blue-500/20', isActive);
+        overlay && overlay.classList.toggle('opacity-30', isActive);
+        overlay && overlay.classList.toggle('opacity-0', !isActive);
+      });
+
+      fitByHeight();
+      window.addEventListener('resize', fitByHeight);
+    })();
+  </script>
+</body>
+</html>
