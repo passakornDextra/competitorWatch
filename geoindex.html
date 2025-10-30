@@ -761,6 +761,10 @@ header .controls button {
   display: inline-block;       /* Ensure padding works */
 }
 
+.card .thumb {
+  object-fit: contain !important;
+  background: #fff; /* optional: makes logos look better */
+}
 
 
   </style>
@@ -780,7 +784,7 @@ header .controls button {
     <div class="controls">
        <div class="brand-vertical" style="text-align:center;">
               <div class="logo" title="Brand">
-                <img id="brandImg1" src="https://raw.githubusercontent.com/jumpbcc158/Logos/main/2.%20GRO.png" alt="Brand Logo" style="max-width:150px;">
+                <img id="brandImg1" src="https://raw.githubusercontent.com/passakornDextra/competitorWatch/main/logos/2.%20GRO.png" alt="Brand Logo" style="max-width:150px;">
 
             </div>
 
@@ -837,7 +841,7 @@ header .controls button {
 
   const STATE = { raw:[], filtered:[], page:1, pageSize:12, sort:'date_desc', source:'', search:'', line:'' };
 
-  const LOGO_BASE = "https://raw.githubusercontent.com/jumpbcc158/Logos/main/";
+  const LOGO_BASE = "https://raw.githubusercontent.com/passakornDextra/competitorWatch/main/logos/";
   const LOGO_DEFAULT = LOGO_BASE + "0 Logo Dextra RGB Web Colors.png";
 
   const LINE_LOGOS = {
