@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
+
+
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Competitor News</title>
@@ -26,7 +28,12 @@
       --radius-lg: 16px;
     }
     
-  
+  #line {
+  display: none !important;
+}
+#source {
+  display: none !important;
+}
   
 
     * { box-sizing: border-box; }
@@ -49,15 +56,10 @@
       margin: 0 auto; 
       padding: 32px 24px;
     }
-#line {
-  display: none !important;
-}
-#source {
-  display: none !important;
-}
+
     
 header {
-  background: #04cc9e; /* Solid Stribe green */
+  background: #0048b6; /* Solid Stribe green */
   color: #fff;
   box-shadow: var(--shadow-md);
   position: sticky;
@@ -79,12 +81,6 @@ header .wrap {
 }
 
 
-.brand-vertical {
-  display: flex;
-  flex-direction: row;
-  align-items: center;      /* Vertically center logo and text */
-  gap: 20px;                /* Space between logo and text */
-}
 
 .logo {
   width: 100px; /* ↓ Smaller logo */
@@ -93,7 +89,7 @@ header .wrap {
   align-items: center;
   justify-content: center;
   background: #fff;
-  border-radius: 8px;
+  border-radius: 0px;
   margin: 0;
   padding: 0;
   box-shadow: none;
@@ -107,6 +103,8 @@ header .wrap {
   padding: 0;
 }
 
+
+
 .brand-vertical h1 {
   font-size: 2em;
   font-weight: 700;
@@ -119,7 +117,21 @@ header .wrap {
   align-items: center; /* Vertically center text with logo */
 }
 
-    
+ 
+.brand-vertical .logo {
+  background: transparent;
+  padding: 0;
+  margin: 0;
+}
+
+#brandImg {
+  background: #fff;            /* White background */
+  border-radius: 0px;         /* Rounded corners */
+  box-shadow: var(--shadow-sm);/* Optional subtle shadow */
+  display: inline-block;       /* Ensure padding works */
+}
+
+   
 
     h1 { 
       margin: 0; 
@@ -323,6 +335,7 @@ header .brand-vertical h1 {
   line-height: 1.2 !important;
 }
 
+
 /* --- Filters: one line on the RIGHT --- */
 header .controls {
   display: flex !important;               /* change from grid → flex */
@@ -510,12 +523,7 @@ main.wrap {
   .rail-right  { order: 3; }
   .card--lead .thumb { height: 220px; }
 }
- 
-.brand-vertical .logo {
-  background: transparent;
-  padding: 0;
-  margin: 0;
-}
+
 
 .card--side .actions {
   display: flex !important; /* or inline-flex */
@@ -753,26 +761,10 @@ header .controls button {
   margin-top: 2px !important; /* Move buttons closer */
 }
 
-
-#brandImg {
-  background: #fff;            /* White background */
-  border-radius: 0px;         /* Rounded corners */
-  box-shadow: var(--shadow-sm);/* Optional subtle shadow */
-  display: inline-block;       /* Ensure padding works */
-  
-}
-
-#brandImg1 {
-  transform: scaleX(-1);       /* Flip left-right */
-  transform-origin: center;    /* Keep flip centered */
-}
 .card .thumb {
   object-fit: contain !important;
   background: #fff; /* optional: makes logos look better */
 }
-
-
-
 
   </style>
 
@@ -786,14 +778,14 @@ header .controls button {
   <div class="wrap">
     <div class="brand-vertical">
       <div class="logo" title="Brand"><img id="brandImg" alt="Brand"></div>
-      <h1>Competitor News - Bar System</h1>
+      <h1>Competitor News - CRP</h1>
     </div>
     <div class="controls">
-       <div class="brand-vertical" style="text-align:center;">
-              <div class="logo" title="Brand">
-                <img id="brandImg1" src="https://raw.githubusercontent.com/passakornDextra/competitorWatch/main/logos/2.%20BAR.png" alt="Brand Logo" style="max-width:150px;">
+      <div class="brand-vertical" style="text-align:center;">
+      <div class="logo" title="Brand">
+        <img id="brandImg1" src="https://raw.githubusercontent.com/passakornDextra/competitorWatch/main/logos/2.%20CRP.png" alt="Brand Logo" style="max-width:150px;">
 
-            </div>
+    </div>
       
       <div class="control"><select id="line"><option value="">All Product Lines</option><option value="CRP">CRP</option><option value="Bars">Bars</option><option value="Geotec">Geotec</option></select></div>
       <div class="control"><select id="source"><option value="">All Companies</option></select></div>
@@ -807,7 +799,8 @@ header .controls button {
         </select>
       </div>
        
-           
+
+     
 
 
 
@@ -938,6 +931,7 @@ header .controls button {
     "boowon bms": "Boowon BMS",
     "mateenbar pultron": "Mateenbar (Pultron)"
   };
+  
   function displayFor(canon) {
     if (!canon) return '';
     if (DISPLAY_NAME[canon]) return DISPLAY_NAME[canon];
@@ -1177,7 +1171,8 @@ function render() {
 
   const shownFrom = 5 + start + 1;
   const shownTo   = 5 + start + pageRows.length;
-  count.textContent = `Welcome to Competitor Watch!`;
+ //count.textContent = `Showing ${Math.min(shownTo, total)} of ${total} articles`;
+ count.textContent = `Welcome to Competitor Watch!`;
 }
 
 
