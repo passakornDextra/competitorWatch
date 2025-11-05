@@ -3,7 +3,7 @@
 
   const STATE = { raw:[], filtered:[], page:1, pageSize:12, sort:'date_desc', source:'', search:'', line:'' };
 
-  const LOGO_BASE = "https://raw.githubusercontent.com/jumpbcc158/Logos/main/";
+  const LOGO_BASE = "https://raw.githubusercontent.com/passakornDextra/competitorWatch/main/logos/";
   const LOGO_DEFAULT = LOGO_BASE + "0 Logo Dextra RGB Web Colors.png";
 
   const LINE_LOGOS = {
@@ -37,8 +37,8 @@
     "boowon bms": "Boowon_BMS_16x9.png",
     "mateenbar": "Mateenbar_16x9.png",
     "mst bar": "MST_Bar_16x9.png",
-    "linxion": "Linxion_16x9.png",
-    "peikko": "Peikko_16x9.png"
+    "linxion": "linxion_16x9.png",
+    "peikko": "PeikkoGroup_16x9.png"
   };
 
   /* --- Aliases coming from CSV (normalize to canonical) --- */
@@ -59,7 +59,8 @@
     "mstbar": "mst bar",
     "mst-bar": "mst bar",
     "sah annahutte": "stahlwerk annahutte",
-    "stahlwerk annahuette": "stahlwerk annahutte"
+    "stahlwerk annahuette": "stahlwerk annahutte",
+
   };
 
   /* --- Product lines per canonical source --- */
