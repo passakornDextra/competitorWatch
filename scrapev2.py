@@ -343,6 +343,64 @@ def scrape_moment_latest_news():
 
     return deduped
 
+def linxion_scrape():
+    url = "https://www.linxion.com/blog/"
+    articles_data = []
+    response = requests.get(url, headers=HEADERS, verify=False)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    articles = soup.find_all('article', class_='entry-card')
+
+    for article in articles:
+        # Title and link
+        title_tag = article.find('h2', class_='entry-title')
+        link_tag = title_tag.find('a') if title_tag else None
+        title = link_tag.get_text(strip=True) if link_tag else ""
+        link = link_tag['href'] if link_tag and link_tag.has_attr('href') else ""
+        if link and not link.startswith("http"):
+            link = "https://www.linxion.com" + link
+
+        # Image
+        img_tag = article.find('img')
+        image_url = img_tag['src'] if img_tag and img_tag.has_attr('src') else ""
+
+        # Extract date from image URL footprint
+        date_text = ""
+        article_date = None
+        if image_url:
+            match = re.search(r"/uploads/(\d{4})/(\d{2})/", image_url)
+            if match:
+                year, month = match.groups()
+                date_text = f"{month}.{year}"
+                try:
+                    article_date = datetime.strptime(f"{year}-{month}-01", "%Y-%m-%d")
+                except Exception:
+                    article_date = None
+
+        # Category
+        category_tag = article.find('ul', class_='entry-meta')
+        category = ""
+        if category_tag:
+            cat_link = category_tag.find('a')
+            category = cat_link.get_text(strip=True) if cat_link else ""
+
+        # Excerpt
+        excerpt_tag = article.find('div', class_='entry-excerpt')
+        summary = excerpt_tag.get_text(strip=True) if excerpt_tag else ""
+
+        articles_data.append({
+            "Title": title,
+            "DateText": date_text,
+            "Date": article_date,
+            "Link": link,
+            "Image": image_url,
+            "Summary": summary,
+            "Source": "Linxion",
+        })
+
+    return articles_data
+
 def scrape_macalloy():
     from urllib.parse import urljoin
     import time
@@ -842,6 +900,86 @@ def scrape_annahutte_selenium_all(headless=True, timeout=20, date_fmt="%Y-%m-%d"
     return articles
 
 
+def scrape_peikko():
+    base_url = "https://www.peikko.com"
+    categories = {
+        "Company News": "/news-and-events/company-news/",
+        "Product News": "/news-and-events/product-news/",
+        "Stories": "/news-and-events/stories/",
+        "Events": "/news-and-events/events/"
+    }
+
+    articles_data = []
+
+    for category_name, path in categories.items():
+        url = base_url + path
+        response = requests.get(url, headers=HEADERS, verify=False)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        if category_name == "Events":
+            articles = soup.find_all('div', class_='content-wrapper')
+        else:
+            articles = soup.find_all('div', class_='post')
+
+        for article in articles:
+            # Title and link
+            title_tag = article.find('h2')
+            link_tag = article.find('a') if title_tag else None
+            title = title_tag.get_text(strip=True) if title_tag else ""
+            link = link_tag['href'] if link_tag and link_tag.has_attr('href') else ""
+            if link.startswith("/"):
+                link = base_url + link
+
+            # Date handling
+            date_tag = article.find('span', class_='date')
+            datetime_str = date_tag.get_text(strip=True) if date_tag else ""
+            article_date = None
+
+            if category_name == "Events":
+                # Handle date range
+                if "-" in datetime_str:
+                    start_str, end_str = [d.strip() for d in datetime_str.split("-")]
+                    try:
+                        start_date = datetime.strptime(start_str, "%d.%m.%Y")
+                        end_date = datetime.strptime(end_str, "%d.%m.%Y")
+                        article_date = start_date
+                        title = f"{title} ({start_str} - {end_str})"
+                        datetime_str = start_str
+                    except Exception:
+                        article_date = None
+                else:
+                    try:
+                        article_date = datetime.strptime(datetime_str, "%d.%m.%Y")
+                    except Exception:
+                        article_date = None
+
+                # Image from <img>
+                img_tag = article.find('img')
+                image_url = img_tag['src'] if img_tag and img_tag.has_attr('src') else ""
+            else:
+                # Non-event image from style
+                image_div = article.find('div', class_='image')
+                image_url = ""
+                if image_div and image_div.has_attr('style'):
+                    style = image_div['style']
+                    if "url(" in style:
+                        image_url = style.split("url(")[1].split(")")[0]
+
+            # Assemble article data
+            articles_data.append({
+                "Title": title,
+                "DateText": datetime_str,
+                "Date": article_date,
+                "Link": link,
+                "Image": image_url,
+                "Summary": "",
+                "Source": "Peikko",
+                "Category": category_name
+            })
+
+    return articles_data
+
 
 def scrape_splice_sleeve():
     # No English news page available
@@ -890,6 +1028,8 @@ def scrape_williams_form():
         })
     return articles_data
 # ---- Configurable Source List ----
+
+
 
 
 
@@ -1246,6 +1386,8 @@ COMPETITOR_SOURCES = [
     ("MST Bar",scrape_tagembed_widget_headless),
     ("Mateenbar Pultron", scrape_mateenbar_and_pultron),
     ("nmb splice sleeve",scrape_splicesleeve_events),
+    ("linxion", linxion_scrape),
+    ("peikko", scrape_peikko)
 ]
 
 def scrape_with_status(scrape_func, site_name):
