@@ -33,7 +33,7 @@
     "moment": "Leviat_Moment_16x9.png",
     "firep minova": "FiReP_16x9.png",
     "williams form": "Williams_Form_16x9.png",
-    "splice sleeve": "Splice_Sleeve_16x9.png",
+    "nmb splice sleeve": "NMB_Splice_Sleeve_16x9.png",
     "boowon bms": "Boowon_BMS_16x9.png",
     "mateenbar": "Mateenbar_16x9.png",
     "mst bar": "MST_Bar_16x9.png",
@@ -68,7 +68,7 @@
     "moment": ["CRP"],
     "ancon": ["CRP"],
     "nvent lenton": ["CRP"],
-    "splice sleeve": ["CRP"],
+    "nmb splice sleeve": ["CRP"],
     "boowon bms": ["CRP"],
     "dywidag": ["Bars", "Geotec"],
     "anker schroeder": ["Bars"],
@@ -95,12 +95,13 @@
     "sah": "Stahlwerk Annahütte",
     "macalloy": "Macalloy",
     "williams form": "Williams Form",
-    "splice sleeve": "Splice Sleeve",
+    "nmb splice sleeve": "NMB Splice Sleeve",
     "mateenbar": "Mateenbar",
     "mst bar": "MST Bar",
     "boowon bms": "Boowon BMS",
     "peikko": "Peikko",
-    "linxion": "Linxion"
+    "linxion": "Linxion",
+    "nmb splice sleeve": "NMB Splice Sleeve"
   };
 
   function displayFor(canon) {
