@@ -26,6 +26,9 @@ HEADERS = {
 }
 
 # ---- Scraper Functions ----
+
+
+
 def scrape_mateenbar_and_pultron():
     all_articles = []
 
@@ -41,20 +44,26 @@ def scrape_mateenbar_and_pultron():
         a_tag = h2_tag.find_parent('a') if h2_tag else None
         title = h2_tag.get_text(strip=True) if h2_tag else ""
         link = a_tag['href'] if a_tag and a_tag.has_attr('href') else ""
+        if link.startswith('/'):
+            link = f"https://pultron.com{link}"
+
         img_tag = article.find('img', class_='img-fluid')
         img_url = img_tag['src'] if img_tag else ""
         if img_url.startswith('/'):
             img_url = f"https://pultron.com{img_url}"
 
+        # Date parsing
         date_text = ""
         article_date = None
         date_tag = article.find('div', class_='blog-post-meta')
         if date_tag:
             date_text = date_tag.get_text(strip=True)
-            try:
-                article_date = datetime.strptime(date_text, "%d %B %Y")
-            except Exception:
-                article_date = None
+            for fmt in ["%d %B %Y", "%B %d, %Y", "%d %b %Y"]:
+                try:
+                    article_date = datetime.strptime(date_text, fmt)
+                    break
+                except ValueError:
+                    continue
 
         summary_tag = article.find('div', class_='post-summary')
         summary = summary_tag.get_text(strip=True) if summary_tag else ""
@@ -88,7 +97,7 @@ def scrape_mateenbar_and_pultron():
         article_date = None
         if link:
             parts = link.split("/")
-            if len(parts) >= 6:
+            if len(parts) >= 7:
                 year, month, day = parts[4], parts[5], parts[6]
                 date_text = f"{year}-{month}-{day}"
                 try:
@@ -112,6 +121,7 @@ def scrape_mateenbar_and_pultron():
         })
 
     return all_articles
+
 
 def scrape_ancon():
     url = "https://www.ancon.co.uk/whats-new"
