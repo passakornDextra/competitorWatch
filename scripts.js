@@ -76,7 +76,7 @@
     "williams form": ["Bars"],
     "stahlwerk annahutte": ["Bars", "Geotec"],
     "sah": ["Bars", "Geotec"],
-    "mateenbar": ["Geotec"],
+    "mateenbar pultron": ["Geotec"],
     "mst bar": ["Geotec"],
     "firep minova": ["Geotec"],
     "peikko": ["CRP"],
@@ -483,3 +483,4 @@ window.addEventListener('scroll', () => {
 
 
   
+
