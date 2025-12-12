@@ -1,17 +1,17 @@
-﻿Site,Status,ArticlesFound
+Site,Status,ArticlesFound
 Ancon,success,9
+Dextra,error: 403 Client Error: Forbidden for url: https://www.dextragroup.com/news/,0
 nVent LENTON,success,11
+Moment Solutions,success,45
+Williams Form,success,10
+Macalloy,success,20
+Linxion,success,6
+Tokyo Tekko,success,5
+Peikko,success,10
+Terwa,success,11
+SRG Global,success,47
 Dywidag,success,12
 Anker Schroeder,success,15
+Boowon,success,0
+Splice Sleeve,success,1
 SAH Annahutte,success,6
-Moment,success,45
-Macalloy,success,20
-Williams Form,success,10
-FiReP Minova,success,44
-MST Bar,"error: Playwright is required. Install with:
-  pip install playwright
-  playwright install",0
-Mateenbar Pultron,success,23
-nmb splice sleeve,success,8
-linxion,success,6
-peikko,success,36
