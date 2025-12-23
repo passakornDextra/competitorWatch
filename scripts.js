@@ -1,175 +1,514 @@
-/**
-* Function: validateOnSave
-* Purpose: Validates mandatory fields and prevents duplicate selections before saving.
-*/
-function validateOnSave(executionContext) {
-    "use strict";
-    var formContext = executionContext.getFormContext();
-    var eventArgs = executionContext.getEventArgs();
-    var status = formContext.getAttribute('dx_projectproductstage').getValue();
-    var hasError = false;
- 
-    // Clear previous notifications
-    formContext.getControl('dx_primarywonreason').clearNotification('won-mandatory');
-    formContext.getControl('dx_primarylostreason').clearNotification('lost-mandatory');
-    formContext.getControl('dx_competitor').clearNotification('comp-won');
-    formContext.getControl('dx_competitor').clearNotification('comp-lost');
-    formContext.getControl('dx_wonreason').clearNotification('won-duplicate');
-    formContext.getControl('dx_lostreason').clearNotification('lost-duplicate');
-    formContext.ui.clearFormNotification('save-block')
- 
-    // ✅ Mandatory checks
-    if (status === 425420003 || status === 425420004) {
-        var primaryWon = formContext.getAttribute('dx_primarywonreason').getValue();
-        var competitor = formContext.getAttribute('dx_competitor').getValue();
-        var otherWon = formContext.getAttribute('dx_wonreason').getValue();
- 
-        if (!primaryWon) {
-            formContext.getControl('dx_primarywonreason').setNotification('Required', 'won-mandatory');
-            hasError = true;
-        }
-        if (primaryWon && primaryWon !== 121960002 && !competitor) {
-            formContext.getControl('dx_competitor').setNotification('Required', 'comp-won');
-            hasError = true;
-        }
-    	if (primaryWon && otherWon && otherWon.includes(primaryWon)) {
-            formContext.getControl('dx_wonreason').setNotification('Duplicate reason', 'won-duplicate');
-            hasError = true;
-    	}
+  const byId = id => document.getElementById(id);
+  const el = (tag, cls) => { const e=document.createElement(tag); if(cls) e.className=cls; return e; }
+
+  const STATE = { raw:[], filtered:[], page:1, pageSize:12, sort:'date_desc', source:'', search:'', line:'' };
+
+  const LOGO_BASE = "https://raw.githubusercontent.com/passakornDextra/competitorWatch/main/logos/";
+  const LOGO_DEFAULT = LOGO_BASE + "0 Logo Dextra RGB Web Colors.png";
+
+  const LINE_LOGOS = {
+    "crp": LOGO_BASE + "CRP_16x9_white.png",
+    "bars": LOGO_BASE + "Bars_16x9_white.png",
+    "geotec": LOGO_BASE + "Geo_16x9_white.png"
+  };
+
+  const normalize = s => (s || "")
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u2013\u2014]/g, "-")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ").trim();
+
+  /* --- Canonical logos (fixed spelling: firep minova) --- */
+  const LOGO_MAP = {
+    "dywidag": "DYWIDAG_16x9.png",
+    "anker schroeder": "Anker_Schroeder_16x9.png",
+    "ancon": "Leviat_Ancon_16x9.png",
+    "stahlwerk annahutte": "SAH_Stahlwerk_Annahutte_16x9.png",
+    "sah": "SAH_Stahlwerk_Annahutte_16x9.png",
+    "nvent lenton": "nVent_Lenton_16x9.png",
+    "lenton": "nVent_Lenton_16x9.png",
+    "macalloy": "Macalloy_16x9.png",
+    "moment": "Leviat_Moment_16x9.png",
+    "firep minova": "FiReP_16x9.png",
+    "williams form": "Williams_Form_16x9.png",
+    "nmb splice sleeve": "NMB_Splice_Sleeve_16x9.png",
+    "boowon bms": "Boowon_BMS_16x9.png",
+    "mateenbar": "Mateenbar_16x9.png",
+    "mst bar": "MST_Bar_16x9.png",
+    "linxion": "linxion_16x9.png",
+    "peikko": "PeikkoGroup_16x9.png"
+  };
+
+  /* --- Aliases coming from CSV (normalize to canonical) --- */
+  const LOGO_ALIASES = {
+    "williams": "williams form",
+    "williams form engineering": "williams form",
+    "williams form engineering corp": "williams form",
+    "william form": "williams form",
+    "moment (leviat)": "moment",
+    "leviat moment": "moment",
+    "moment-leviat": "moment",
+    "moment leviat": "moment",
+    "ancon (leviat)": "ancon",
+    "minova apac": "firep minova",
+    "firep": "firep minova",
+    "fi rep": "firep minova",
+    "fi rep minova": "firep minova",
+    "mstbar": "mst bar",
+    "mst-bar": "mst bar",
+    "sah annahutte": "stahlwerk annahutte",
+    "stahlwerk annahuette": "stahlwerk annahutte",
+
+  };
+
+  /* --- Product lines per canonical source --- */
+  const LINE_MAP = {
+    "moment": ["CRP"],
+    "ancon": ["CRP"],
+    "nvent lenton": ["CRP"],
+    "nmb splice sleeve": ["CRP"],
+    "boowon bms": ["CRP"],
+    "dywidag": ["Bars", "Geotec"],
+    "anker schroeder": ["Bars"],
+    "macalloy": ["Bars"],
+    "williams form": ["Bars"],
+    "stahlwerk annahutte": ["Bars", "Geotec"],
+    "sah": ["Bars", "Geotec"],
+    "mateenbar": ["Geotec"],
+    "mst bar": ["Geotec"],
+    "firep minova": ["Geotec"],
+    "peikko": ["CRP"],
+    "linxion": ["CRP"],
+  };
+
+  /* --- Display name mapping (what the user sees) --- */
+  const DISPLAY_NAME = {
+    "moment": "Moment (Leviat)",
+    "ancon": "Ancon (Leviat)",
+    "nvent lenton": "nVent LENTON",
+    "firep minova": "FiReP Minova",
+    "dywidag": "DYWIDAG",
+    "anker schroeder": "Anker Schroeder",
+    "stahlwerk annahutte": "Stahlwerk Annahütte",
+    "sah": "Stahlwerk Annahütte",
+    "macalloy": "Macalloy",
+    "williams form": "Williams Form",
+    "nmb splice sleeve": "NMB Splice Sleeve",
+    "mateenbar": "Mateenbar",
+    "mst bar": "MST Bar",
+    "boowon bms": "Boowon BMS",
+    "peikko": "Peikko",
+    "linxion": "Linxion",
+    "nmb splice sleeve": "NMB Splice Sleeve"
+  };
+
+  function displayFor(canon) {
+    if (!canon) return '';
+    if (DISPLAY_NAME[canon]) return DISPLAY_NAME[canon];
+    return canon.replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  function logoFileFor(canonical) {
+    if (LOGO_MAP[canonical]) return LOGO_MAP[canonical];
+    let bestKey = null;
+    for (const k in LOGO_MAP) {
+      if (canonical.includes(k)) { if (!bestKey || k.length > bestKey.length) bestKey = k; }
     }
-    else if (status === 425420006) {
-        var primaryLost = formContext.getAttribute('dx_primarylostreason').getValue();
-        var competitorLost = formContext.getAttribute('dx_competitor').getValue();
-        var mandatoryLostReasons = [425420013, 425420007, 425420000, 425420005];
-	var otherLost = formContext.getAttribute('dx_lostreason').getValue();
- 
-        if (!primaryLost) {
-            formContext.getControl('dx_primarylostreason').setNotification('Required', 'lost-mandatory');
-            hasError = true;
-        }
-        if (primaryLost && mandatoryLostReasons.includes(primaryLost) && !competitorLost) {
-            formContext.getControl('dx_competitor').setNotification('Required', 'comp-lost');
-            hasError = true;
-        }
-	if (primaryLost && otherLost && otherLost.includes(primaryLost)) {
-            formContext.getControl('dx_lostreason').setNotification('Duplicate reason', 'lost-duplicate');
-            hasError = true;
-	}
+    return bestKey ? LOGO_MAP[bestKey] : null;
+  }
+
+  function canonicalFor(name) {
+    const key = normalize(name);
+    return LOGO_ALIASES[key] || key;
+  }
+
+  function logoSrcFor(nameOrCanon) {
+    const canonical = canonicalFor(nameOrCanon);
+    const file = logoFileFor(canonical);
+    return file ? (LOGO_BASE + file) : null;
+  }
+
+  function linesFor(name) {
+    const canonical = canonicalFor(name);
+    return LINE_MAP[canonical] || [];
+  }
+
+  function setHeaderLogo() {
+    const img = byId("brandImg");
+    const companyLogo = STATE.source && logoSrcFor(STATE.source); // STATE.source is canonical
+    const lineKey = (STATE.line || '').toLowerCase();
+    const lineSrc = LINE_LOGOS[lineKey];
+    const src = companyLogo || lineSrc || LOGO_DEFAULT;
+
+    img.hidden = false;
+    img.alt = companyLogo ? displayFor(STATE.source) : (STATE.line || 'Dextra');
+    img.src = src;
+    img.onerror = () => { img.onerror = null; img.src = LOGO_DEFAULT; };
+  }
+
+  function parseDate(v) {
+    if (!v) return null;
+    const d = new Date(v);
+    if (!isNaN(d)) return d;
+    const m = String(v).match(/(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/);
+    if (m) {
+      const [_, d1, m1, y1] = m;
+      const yr = y1.length === 2 ? (Number(y1) + 2000) : Number(y1);
+      return new Date(yr, Number(m1) - 1, Number(d1));
     }
-    // ✅ Block save if any error
-    if (hasError && eventArgs) {
-        formContext.ui.setFormNotification('Please fix errors before saving.', 'ERROR', 'save-block');
-        eventArgs.preventDefault();
-    }
+    return null;
+  }
+
+  
+function formatDateDDMMYYYY(input) {
+  if (!input) return '';
+  // Accept ISO string "YYYY-MM-DD" or a Date object
+  let d;
+  if (typeof input === 'string') {
+    // Expected: "YYYY-MM-DD"
+    const [y, m, day] = input.split('-').map(Number);
+    if (!y || !m || !day) return input; // fallback: show as-is if not ISO-like
+    // Create a Date so we can zero-pad consistently
+    d = new Date(y, m - 1, day);
+  } else if (input instanceof Date) {
+    d = input;
+  } else {
+    return String(input);
+  }
+
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  return `${dd}-${mm}-${yyyy}`;
 }
- 
-/* ---------------- ORIGINAL FUNCTIONS CONTINUE ---------------- */
-function calculateTotalDelQuantity(formContext, recordId) {
-    "use strict";
-    var totalDelQty = 0;
-    Xrm.WebApi.retrieveMultipleRecords("dx_deliveryschedule", `?$select=dx_plannedquantity&$filter=_dx_projectproduct_value eq ${recordId} and statecode eq 0`).then(
-        function success(result) {
-            for (var i = 0; i < result.entities.length; i++) {
-                totalDelQty += result.entities[i].dx_plannedquantity;
-            }
-            formContext.getAttribute("dx_totaldeliveryschedulequantity").setValue(totalDelQty);
-            var qtyOnProduct = formContext.getAttribute("quantity").getValue();
-            if (totalDelQty > qtyOnProduct) {
-                formContext.getControl("dx_totaldeliveryschedulequantity").setNotification('should not be greater than product quantity.', '8198b16d-f7f7-49f7-a4cc-dd9c1f8dcc5c');
-            } else {
-                formContext.getControl("dx_totaldeliveryschedulequantity").clearNotification('8198b16d-f7f7-49f7-a4cc-dd9c1f8dcc5c');
-            }
-            setOrClearFormNotification(totalDelQty, qtyOnProduct, formContext);
+
+
+  function loadCSV() {
+    Papa.parse('export_combined.csv', {
+      download: true, header: true, skipEmptyLines: true,
+      complete: (res) => {
+        const rows = res.data.map(r => {
+          const srcRaw   = r.Source?.trim() || '';
+          const srcCanon = canonicalFor(srcRaw);
+
+          // Normalize ISO date (prefer CSV DateISO; fallback to parsed Date/DateText)
+          const isoCSV = (r.DateISO || '').trim().slice(0, 10); // YYYY-MM-DD
+          const fallbackObj = parseDate(r.Date || r.DateText);
+          const isoFallback = fallbackObj ? fallbackObj.toISOString().slice(0,10) : '';
+          const dateISO = isoCSV || isoFallback;
+
+          // Robust numeric sort key; blank → 0 (goes to bottom on DESC)
+          const dateKeyNum = dateISO ? Number(dateISO.replace(/-/g, '')) : 0;
+
+          return {
+            Title: r.Title?.trim() || '',
+            DateText: r.DateText?.trim() || '',
+            DateISO: dateISO,
+            DateObj: fallbackObj || null,
+            DateKeyNum: dateKeyNum,
+            Link: r.Link?.trim() || '',
+            Image: r.Image?.trim() || '',
+            Summary: r.Summary?.trim() || '',
+            Source: srcRaw,                      // original
+            SourceCanon: srcCanon,               // normalized key
+            SourceDisplay: displayFor(srcCanon), // pretty label
+            Lines: linesFor(srcRaw)
+          };
+        });
+
+        STATE.raw = rows;
+        hydrateSources(rows);
+
+        const params = new URLSearchParams(location.search);
+        const preCompany = params.get('company');
+        const preLine = params.get('line');
+        const preSearch = params.get('search');
+        const preSort = params.get('sort');
+        
+        if (preCompany) {
+          const cand = canonicalFor(preCompany);
+          if ([...byId('source').options].some(o => o.value === cand)) {
+            byId('source').value = cand;
+            STATE.source = cand;
+          }
         }
+        if (preLine && ["CRP","Bars","Geotec"].includes(preLine)) {
+          byId('line').value = preLine;
+          STATE.line = preLine;
+        }
+        if (preSearch) {
+          byId('search').value = preSearch;
+          STATE.search = preSearch;
+        }
+        if (preSort && ['date_desc', 'date_asc', 'title_asc', 'title_desc'].includes(preSort)) {
+          byId('sort').value = preSort;
+          STATE.sort = preSort;
+        }
+
+        setHeaderLogo();
+        applyFilters();
+      },
+      error: () => { byId('status').textContent = 'Could not load export_combined.csv.'; }
+    });
+  }
+
+  /* Populate dropdown using canonical values but display nice names */
+  function hydrateSources(rows) {
+    const sel = byId('source');
+    const uniqCanon = [...new Set(rows.map(r => r.SourceCanon).filter(Boolean))]
+      .sort((a,b) => displayFor(a).localeCompare(displayFor(b)));
+    uniqCanon.forEach(canon => {
+      const o = el('option');
+      o.value = canon;                   // filter by canonical
+      o.textContent = displayFor(canon); // label users see
+      sel.appendChild(o);
+    });
+  }
+
+  function applyFilters() {
+    const { source, sort, search, line } = STATE;
+    let rows = STATE.raw.filter(r =>
+      (!source || r.SourceCanon === source) &&
+      (!line || (r.Lines && r.Lines.includes(line))) &&
+      (!search || r.Title.toLowerCase().includes(search.toLowerCase()) || r.Summary.toLowerCase().includes(search.toLowerCase()))
     );
-}
+
+    rows.sort((a, b) => {
+      switch (sort) {
+        case 'title_asc':  return a.Title.localeCompare(b.Title);
+        case 'title_desc': return b.Title.localeCompare(a.Title);
+        case 'date_asc':
+          return (a.DateKeyNum - b.DateKeyNum) ||
+                 a.Title.localeCompare(b.Title);
+        default: // date_desc
+          return (b.DateKeyNum - a.DateKeyNum) ||
+                 a.Title.localeCompare(b.Title);
+      }
+    });
+
+    STATE.filtered = rows;
+    STATE.page = 1;
+    render();
+  }
+
  
-function updatePlannedDates(executionContext) {
-    "use strict";
-    var formContext = executionContext.getFormContext();
-    var closedate = formContext.getAttribute('dx_closedate').getValue();
-    var recordId = formContext.data.entity.getId();
-    Xrm.WebApi.retrieveMultipleRecords("dx_deliveryschedule", `?$select=dx_planneddate&$filter=_dx_projectproduct_value eq ${recordId}`).then(
-        function success(result) {
-            for (var i = 0; i < result.entities.length; i++) {
-                var delPlannedDate = result.entities[i].dx_planneddate;
-                var delId = result.entities[i].recordId;
-            }
-        }
-    );
+
+function render() {
+  const grid = byId('grid');
+  const rail = byId('rail');
+  const status = byId('status');
+  const pager = byId('pager');
+  const count = byId('articleCount');
+
+  const rows = STATE.filtered || [];
+  const total = rows.length;
+
+  // No results
+  if (!total) {
+    rail.hidden = true;
+    grid.hidden = true;
+    pager.hidden = true;
+    count.hidden = true;
+    status.hidden = false;
+    status.textContent = 'No articles found.';
+    return;
+  }
+
+  status.hidden = true;
+  count.hidden = false;
+
+  // Prepare top 5: center (1), left (2), right (2)
+  const center = rows[0] || null;
+  const leftStories  = rows.slice(1, 3);
+  const rightStories = rows.slice(3, 5);
+
+  // Render rail
+  rail.hidden = false;
+  const railLeft   = rail.querySelector('.rail-left');
+  const railCenter = rail.querySelector('.rail-center');
+  const railRight  = rail.querySelector('.rail-right');
+
+  railLeft.innerHTML = '';
+  railCenter.innerHTML = '';
+  railRight.innerHTML = '';
+
+  if (center)    railCenter.appendChild(card(center, 'lead'));
+  leftStories.forEach(s  => railLeft.appendChild(card(s, 'side')));
+  rightStories.forEach(s => railRight.appendChild(card(s, 'side')));
+
+  // Render rest in grid with pagination
+  const rest = rows.slice(5);
+  grid.innerHTML = '';
+
+  if (rest.length === 0) {
+    grid.hidden = true;
+    pager.hidden = true;
+    count.textContent = `Showing ${Math.min(5, total)} of ${total} articles`;
+    return;
+  }
+
+  grid.hidden = false;
+  pager.hidden = false;
+
+  const totalPages = Math.max(1, Math.ceil(rest.length / STATE.pageSize));
+  if (STATE.page > totalPages) STATE.page = totalPages;
+
+  const start = (STATE.page - 1) * STATE.pageSize;
+  const end = start + STATE.pageSize;
+  const pageRows = rest.slice(start, end);
+
+  pageRows.forEach(r => grid.appendChild(card(r)));
+
+  byId('pageInfo').textContent = `Page ${STATE.page} / ${totalPages}`;
+  byId('prev').disabled = STATE.page <= 1;
+  byId('next').disabled = STATE.page >= totalPages;
+
+  const shownFrom = 5 + start + 1;
+  const shownTo   = 5 + start + pageRows.length;
+  count.textContent = `Welcome to Competitor News, now we scrape ${total} articles`;
 }
- 
-function validateQuantity(executionContext) {
-    "use strict";
-    var formContext = executionContext.getFormContext();
-    formContext.getControl("dx_totaldeliveryschedulequantity").clearNotification('8198b16d-f7f7-49f7-a4cc-dd9c1f8dcc5c');
-    var totalQuantity = formContext.getAttribute("dx_totaldeliveryschedulequantity").getValue();
-    var qtyOnProduct = formContext.getAttribute("quantity").getValue();
-    if (qtyOnProduct !== 0 && totalQuantity !== 0) {
-        if (totalQuantity > qtyOnProduct) {
-            formContext.getControl("dx_totaldeliveryschedulequantity").setNotification('should not be greater than product quantity.', '8198b16d-f7f7-49f7-a4cc-dd9c1f8dcc5c');
-        } else {
-            formContext.getControl("dx_totaldeliveryschedulequantity").clearNotification('8198b16d-f7f7-49f7-a4cc-dd9c1f8dcc5c');
-        }
-        setOrClearFormNotification(totalQuantity, qtyOnProduct, formContext);
-    }
+
+
+  // Keep your existing prev/next listeners; they already call render().
+
+
+  
+function card(row, variant) {
+  const c = el('article', 'card' + (variant ? ` card--${variant}` : ''));
+  const img = el('img', 'thumb');
+  img.loading = 'lazy';
+  img.alt = row.Title || 'thumbnail';
+  img.src = row.Image || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22225%22><rect width=%22400%22 height=%22225%22 fill=%22%23f1f5f9%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%2394a3b8%22 font-size=%2218%22 font-family=%22system-ui%22 font-weight=%22600%22>No image available</text></svg>';
+  img.onerror = () => {
+    img.onerror = null;
+    img.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225"><rect width="400" height="225" fill="%23f1f5f9"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%2394a3b8" font-size="18" font-family="system-ui" font-weight="600">No image available</text></svg>';
+  };
+  c.appendChild(img);
+
+  const p = el('div', 'pad');
+  const h = el('h2', 'title'); h.textContent = row.Title || '(Untitled)';
+  const meta = el('div', 'meta');
+
+  const chip = el('span', 'chip');
+  chip.textContent = row.SourceDisplay || 'Unknown';
+  meta.append(chip);
+
+  if (row.Lines && row.Lines.length) {
+    row.Lines.forEach(L => {
+      const ch = el('span', 'chip line'); ch.textContent = L; meta.append('•', ch);
+    });
+  }
+
+
+  const date = el('span');
+  // Prefer DateISO; if missing, fallback to DateObj; else show DateText
+  date.textContent = row.DateISO
+    ? formatDateDDMMYYYY(row.DateISO)
+    : (row.DateObj ? formatDateDDMMYYYY(row.DateObj) : (row.DateText || ''));
+  meta.append('•', date);
+
+
+  const sum = el('p', 'summary'); sum.textContent = row.Summary || '';
+  p.append(h, meta, sum);
+  c.appendChild(p);
+
+  const actions = el('div', 'actions');
+  const a1 = el('a', 'link primary'); a1.href = row.Link || '#'; a1.target = '_blank'; a1.rel = 'noopener'; a1.textContent = 'Read Article';
+  const a2 = el('a', 'link'); a2.href = `https://www.google.com/search?q=${encodeURIComponent((row.Title || '') + ' ' + (row.SourceDisplay || ''))}`; a2.target = '_blank'; a2.rel = 'noopener'; a2.textContent = 'Search More';
+  actions.append(a1, a2);
+  c.appendChild(actions);
+
+  return c;
 }
- 
-function setListPrice(executionContext) {
-    "use strict";
-    var formContext = executionContext.getFormContext();
-    var product = formContext.getAttribute('productid').getValue();
-    if (product !== null) {
-        var prodId = product[0].id.replace(/[{}]/g, '');
-        Xrm.WebApi.retrieveRecord("product", prodId, "?$select=_pricelevelid_value").then(
-            function success(result) {
-                if (result && result._pricelevelid_value) {
-                    Xrm.WebApi.retrieveMultipleRecords("productpricelevel", `?$select=amount&$filter=_pricelevelid_value eq ${result._pricelevelid_value} and _productid_value eq ${prodId}`).then(
-                        function success(resultpl) {
-                            if (resultpl) {
-                                var amount = 0;
-                                for (var i = 0; i < resultpl.entities.length; i++) {
-                                    amount += resultpl.entities[i].amount;
-                                }
-                                formContext.getAttribute('dx_listprice').setValue(amount);
-                            }
-                        }
-                    );
-                }
-            }
-        );
-    }
+
+function filterCompaniesByLine(selectedLine) {
+  const sel = byId('source');
+  sel.innerHTML = ''; // Clear existing options
+
+  // Always include "All Companies"
+  const defaultOpt = el('option');
+  defaultOpt.value = '';
+  defaultOpt.textContent = 'All Companies';
+  sel.appendChild(defaultOpt);
+
+  // If no line selected, show all companies
+  if (!selectedLine) {
+    const uniqCanon = [...new Set(STATE.raw.map(r => r.SourceCanon).filter(Boolean))]
+      .sort((a,b) => displayFor(a).localeCompare(displayFor(b)));
+    uniqCanon.forEach(canon => {
+      const o = el('option');
+      o.value = canon;
+      o.textContent = displayFor(canon);
+      sel.appendChild(o);
+    });
+    return;
+  }
+
+  // Filter companies that have this line in LINE_MAP
+  const uniqCanon = [...new Set(STATE.raw.map(r => r.SourceCanon).filter(Boolean))]
+    .filter(canon => (LINE_MAP[canon] || []).includes(selectedLine))
+    .sort((a,b) => displayFor(a).localeCompare(displayFor(b)));
+
+  uniqCanon.forEach(canon => {
+    const o = el('option');
+    o.value = canon;
+    o.textContent = displayFor(canon);
+    sel.appendChild(o);
+  });
 }
- 
-function setDefaultValueForReporting(executionContext) {
-    "use strict";
-    var formContext = executionContext.getFormContext();
-    var opportunity = formContext.getAttribute('opportunityid').getValue();
-    if (opportunity) {
-        var recordId = opportunity[0].id.replace(/[{}]/g, '');
-        Xrm.WebApi.retrieveMultipleRecords("opportunityproduct", `?$select=quantity&$filter=_opportunityid_value eq ${recordId}`).then(
-            function success(result) {
-                if (result.entities.length === 0) {
-                    formContext.getAttribute("dx_valueforreporting").setValue(true);
-                }
-            }
-        );
-    }
-}
- 
-function setOrClearFormNotification(totalQuantity, qtyOnProduct, formContext) {
-    "use strict";
-    if (totalQuantity !== qtyOnProduct) {
-        formContext.ui.setFormNotification(`Quantity mismatch. Remaining quantity ${qtyOnProduct - totalQuantity}`, 'WARNING', '9198b16d-f7f7-49f7-a4cc-dd9c1f8dcc5c');
-    } else {
-        formContext.ui.clearFormNotification('9198b16d-f7f7-49f7-a4cc-dd9c1f8dcc5c');
-    }
-}
- 
-function refreshOnLoad(executionContext) {
-    "use strict";
-    var formContext = executionContext.getFormContext();
-    if (formContext) {
-        formContext.data.refresh(true);
-    }
-}
+
+
+
+const allowedLines = ["CRP", "Bars", "Geotec"];
+
+byId('source').addEventListener('change', e => {
+  STATE.source = e.target.value;
+  setHeaderLogo();
+  applyFilters();
+});
+
+
+byId('line').addEventListener('change', e => {
+  STATE.line = e.target.value;
+  filterCompaniesByLine(STATE.line); // Rebuild company dropdown
+  setHeaderLogo();
+  applyFilters();
+});
+
+
+byId('sort').addEventListener('change', e => {
+  STATE.sort = e.target.value;
+  applyFilters();
+});
+
+byId('search').addEventListener('input', e => {
+  STATE.search = e.target.value;
+  applyFilters();
+});
+
+byId('prev').addEventListener('click', () => {
+  STATE.page = Math.max(1, STATE.page - 1);
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+byId('next').addEventListener('click', () => {
+  const totalPages = Math.max(1, Math.ceil(STATE.filtered.length / STATE.pageSize));
+  STATE.page = Math.min(totalPages, STATE.page + 1);
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+window.addEventListener('scroll', () => {
+  const btn = byId('backToTop');
+  btn.style.display = window.scrollY > 300 ? 'block' : 'none';
+});
+
+
+  setHeaderLogo();
+  loadCSV();
+
+
+  
