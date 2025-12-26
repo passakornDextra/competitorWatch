@@ -11,7 +11,7 @@ FiReP Minova,success,44
 MST Bar,"error: Playwright is required. Install with:
   pip install playwright
   playwright install",0
-Mateenbar Pultron,"error: HTTPSConnectionPool(host='mateenbar.com', port=443): Max retries exceeded with url: /en-us/blog/ (Caused by ConnectTimeoutError(<HTTPSConnection(host='mateenbar.com', port=443) at 0x7f6f5ea612d0>, 'Connection to mateenbar.com timed out. (connect timeout=None)'))",0
+Mateenbar Pultron,success,23
 nmb splice sleeve,success,8
 linxion,success,6
 peikko,success,37
