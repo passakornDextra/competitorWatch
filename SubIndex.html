@@ -760,6 +760,64 @@ header .controls button {
   background: #fff; /* optional: makes logos look better */
 }
 
+/* ===== Hide ALL top bar controls ===== */
+header .controls {
+  display: none !important;
+}
+
+/* ===== Keep header compact and aligned ===== */
+header .wrap {
+  justify-content: flex-start !important;
+}
+
+header {
+  min-height: 56px !important;
+}
+
+/* === Floating sidebar hint === */
+#sidebarHint {
+  position: fixed;
+  left: 16px;                 /* stays close to SharePoint nav */
+  top: 50%;
+  transform: translateY(-50%);
+  background: #0f766e;        /* matches your green theme */
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  z-index: 9999;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Info icon */
+#sidebarHint .hint-icon {
+  font-size: 18px;
+}
+
+/* Hide text on narrow screens */
+@media (max-width: 900px) {
+  #sidebarHint .hint-text {
+    display: none;
+  }
+}
+
+/* Subtle hover */
+#sidebarHint:hover {
+  transform: translateY(-50%) scale(1.05);
+}
+
+/* Optional dismiss state */
+#sidebarHint.dismissed {
+  opacity: 0;
+  pointer-events: none;
+}
+
 
   </style>
 
@@ -820,5 +878,23 @@ header .controls button {
 
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="scripts.js"></script>
+
+
+<div id="sidebarHint">
+  <span class="hint-icon">ℹ️</span>
+  <span class="hint-text">
+    To view a specific competitor,<br>
+    select it from the <strong>left sidebar</strong>
+  </span>
+</div>
+
+<script>
+  document.getElementById('sidebarHint').addEventListener('click', function () {
+    this.classList.add('dismissed');
+  });
+</script>
+
+
+
 </body>
 </html>
