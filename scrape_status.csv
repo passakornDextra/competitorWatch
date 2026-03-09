@@ -11,7 +11,7 @@ FiReP Minova,success,44
 MST Bar,"error: Playwright is required. Install with:
   pip install playwright
   playwright install",0
-Mateenbar Pultron,error: 500 Server Error: Internal Server Error for url: https://mateenbar.com/en-us/blog/,0
+Mateenbar Pultron,success,23
 nmb splice sleeve,success,8
 linxion,success,6
 peikko,success,41
