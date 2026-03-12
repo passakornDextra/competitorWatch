@@ -884,6 +884,98 @@ header .controls button {
 #sidebarHintTop.dismissed {
   display: none;
 }
+/* =========================
+   Top Floating Excel Pill (Modern)
+   ========================= */
+:root{
+  --excelA: #22c55e;   /* modern green */
+  --excelB: #16a34a;
+  --excelC: #0b7a3a;
+
+  --glass: rgba(255,255,255,.72);
+  --glass2: rgba(255,255,255,.52);
+  --stroke: rgba(15, 23, 42, .10);
+  --ink: #0f172a;
+}
+
+.top-excel-pill{
+  position: fixed;
+  top: 86px;              /* tweak: keeps clear of sticky header */
+  right: 18px;
+  z-index: 100000;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 14px;
+  border-radius: 999px;
+  text-decoration: none;
+  color: var(--ink);
+  font-weight: 750;
+  font-size: 13.5px;
+  letter-spacing: .2px;
+
+  /* modern glass */
+  background: linear-gradient(180deg, var(--glass), var(--glass2));
+  border: 1px solid var(--stroke);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  box-shadow:
+    0 18px 40px rgba(15, 23, 42, .12),
+    0 6px 14px rgba(15, 23, 42, .10);
+
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+/* Excel badge */
+.top-excel-pill .excel-badge{
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+
+  background: linear-gradient(135deg, var(--excelA), var(--excelC));
+  box-shadow:
+    0 8px 16px rgba(22, 163, 74, .30),
+    inset 0 1px 0 rgba(255,255,255,.25);
+  border: 1px solid rgba(255,255,255,.25);
+}
+
+/* subtle "live" ring on hover */
+.top-excel-pill:hover{
+  transform: translateY(-2px);
+  border-color: rgba(34,197,94,.35);
+  box-shadow:
+    0 24px 54px rgba(15, 23, 42, .18),
+    0 10px 22px rgba(22, 163, 74, .14);
+}
+
+.top-excel-pill:active{
+  transform: translateY(-1px);
+}
+
+/* optional: small caption style */
+.top-excel-pill .label{
+  white-space: nowrap;
+}
+
+/* mobile: keep it compact */
+@media (max-width: 520px){
+  .top-excel-pill{
+    top: 74px;
+    right: 12px;
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+  .top-excel-pill .excel-badge{
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+  }
+}
 
 
 
@@ -977,11 +1069,73 @@ header .controls button {
   });
 </script>
 
+<!-- Floating Excel Link Button -->
+<a class="top-excel-pill"
+   href="https://dextranet.sharepoint.com/:x:/r/sites/CompetitorsWatch/Shared%20Documents/Key_Competitors_Summary.xlsx?d=w6a74cc0c557b49bc87f73c56406fe3a0&csf=1&web=1&e=DZy633"
+   target="_blank"
+   rel="noopener noreferrer"
+   aria-label="Open Key Competitor Summary (Excel)">
 
+
+<span class="excel-badge" aria-hidden="true">
+  <!-- Modern Excel tile icon (inline SVG, no external assets) -->
+  <svg width="22" height="22" viewBox="0 0 48 48" role="img" aria-label="Excel">
+    <!-- right sheet panel -->
+    <path d="M20 8h18a2 2 0 0 1 2 2v28a2 2 0 0 1-2 2H20a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2z"
+          fill="rgba(255,255,255,.22)"/>
+    <!-- sheet lines -->
+    <path d="M23 16h14M23 22h14M23 28h14M23 34h14"
+          stroke="rgba(255,255,255,.40)" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- left Excel tile -->
+    <defs>
+      <linearGradient id="excelG" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#33C481"/>
+        <stop offset=".55" stop-color="#16A34A"/>
+        <stop offset="1" stop-color="#0B7A3A"/>
+      </linearGradient>
+    </defs>
+    <path d="M8.5 12.5h16.5a3 3 0 0 1 3 3v17a3 3 0 0 1-3 3H8.5a3 3 0 0 1-3-3v-17a3 3 0 0 1 3-3z"
+          fill="url(#excelG)"/>
+    <path d="M10.3 16.4h6.2c.6 0 1.1.3 1.5.8l2 2.9 2-2.9c.3-.5.9-.8 1.5-.8h.2"
+          fill="none"/>
+
+    <!-- white X -->
+    <path d="M13 31l5-7-5-7h4l3 5 3-5h4l-5 7 5 7h-4l-3-5-3 5h-4z"
+          fill="#fff"/>
+
+    <!-- subtle shine -->
+    <path d="M8.5 12.5h16.5a3 3 0 0 1 3 3v1.4c-6.2 2.4-14.4 3.2-22.5 1.2V15.5a3 3 0 0 1 3-3z"
+          fill="rgba(255,255,255,.16)"/>
+  </svg>
+</span>
+
+
+  <span class="label">Key Competitor Summary</span>
+</a>
+<script>
+  (function(){
+    const fab = document.querySelector('.fab-excel');
+    const topBtn = document.getElementById('backToTop');
+    if(!fab || !topBtn) return;
+
+    const obs = new MutationObserver(() => {
+      // when backToTop is visible, push fab upward slightly
+      const visible = getComputedStyle(topBtn).display !== 'none';
+      fab.style.bottom = visible ? '124px' : '96px';
+    });
+
+    obs.observe(topBtn, { attributes: true, attributeFilter: ['style', 'class'] });
+    // initial
+    const visible = getComputedStyle(topBtn).display !== 'none';
+    fab.style.bottom = visible ? '124px' : '96px';
+  })();
+</script>
   
 </body>
 
 </html>
+
 
 
 
