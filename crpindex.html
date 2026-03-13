@@ -905,10 +905,10 @@ header .controls button {
   gap: 10px;
 
   padding: 10px 14px;
-  border-radius: 999px;
+  border-radius: 10px;    /* less round than pill */
   text-decoration: none;
   color: var(--ink);
-  font-weight: 750;
+  font-weight: 600;
   font-size: 13.5px;
   letter-spacing: .2px;
 
@@ -923,6 +923,72 @@ header .controls button {
     0 6px 14px rgba(15, 23, 42, .10);
 
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+
+  /* required for the animated underline */
+  overflow: hidden;
+}
+
+/* =========================
+   Hover: moving underline track + scanner (keeps moving)
+   ========================= */
+
+/* subtle track line (only visible on hover) */
+.top-excel-pill::after{
+  content: "";
+  position: absolute;
+  left: 14px;     /* aligns with padding */
+  right: 14px;
+  bottom: 8px;
+  height: 2px;
+
+  background: rgba(15, 23, 42, .12); /* aligns with ink/stroke */
+  border-radius: 999px;
+
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+
+/* moving scanner highlight */
+.top-excel-pill::before{
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 8px;
+  height: 2px;
+
+  /* Excel-aligned gradient sweep */
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(34,197,94,0) 25%,
+    rgba(34,197,94,.95) 50%,
+    rgba(22,163,74,0) 75%,
+    transparent 100%
+  );
+
+  background-size: 200% 100%;
+  background-position: 0% 50%;
+  border-radius: 999px;
+
+  opacity: 0; /* hidden until hover */
+}
+
+/* start the animation ONLY on hover/focus */
+.top-excel-pill:hover::after,
+.top-excel-pill:focus-visible::after{
+  opacity: 1;
+}
+
+.top-excel-pill:hover::before,
+.top-excel-pill:focus-visible::before{
+  opacity: 1;
+  animation: underline-scan 900ms linear infinite;
+}
+
+@keyframes underline-scan{
+  from { background-position: 0% 50%; }
+  to   { background-position: 200% 50%; }
 }
 
 /* Excel badge */
@@ -971,7 +1037,27 @@ header .controls button {
     height: 32px;
     border-radius: 10px;
   }
+
+  /* keep underline aligned with new padding */
+  .top-excel-pill::before,
+  .top-excel-pill::after{
+    left: 12px;
+    right: 12px;
+    bottom: 7px;
+  }
 }
+
+/* Accessibility: reduce motion */
+@media (prefers-reduced-motion: reduce){
+  .top-excel-pill::before{
+    animation: none !important;
+  }
+  .top-excel-pill::before,
+  .top-excel-pill::after{
+    transition: none !important;
+  }
+}
+``
 
 
 
@@ -1132,6 +1218,7 @@ header .controls button {
 </body>
 
 </html>
+
 
 
 
