@@ -13,5 +13,5 @@ MST Bar,"error: Playwright is required. Install with:
   playwright install",0
 Mateenbar Pultron,success,23
 nmb splice sleeve,success,8
-linxion,success,6
-peikko,success,41
+linxion,error: 500 Server Error: Internal Server Error for url: https://www.linxion.com/blog/,0
+peikko,success,40
