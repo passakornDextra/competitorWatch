@@ -7,7 +7,7 @@ SAH Annahutte,success,6
 Moment,success,45
 Macalloy,success,20
 Williams Form,success,10
-FiReP Minova,success,44
+FiReP Minova,success,0
 MST Bar,"error: Playwright is required. Install with:
   pip install playwright
   playwright install",0
