@@ -4,7 +4,7 @@ nVent LENTON,success,11
 Dywidag,success,12
 Anker Schroeder,success,15
 SAH Annahutte,success,6
-Moment,success,45
+Moment,error: 415 Client Error: Unsupported Media Type for url: https://www.moment-solutions.com/latest-news/,0
 Macalloy,success,20
 Williams Form,success,10
 FiReP Minova,success,0
@@ -14,4 +14,4 @@ MST Bar,"error: Playwright is required. Install with:
 Mateenbar Pultron,success,23
 nmb splice sleeve,success,8
 linxion,success,6
-peikko,success,37
+peikko,success,38
