@@ -369,6 +369,11 @@
    mega panel and the Spotlight (⌘K) quick search remain.
    ============================================================ */
 
+/* FIX: both constants below were missing their closing quote (")
+   and trailing semicolon — this caused an "Invalid or unexpected
+   token" SyntaxError that killed this entire <script> block,
+   which is why nothing (Competitors menu, Spotlight, back-to-top
+   wiring) was rendering. */
 const CW_BASE = "https://dextranet.sharepoint.com/sites/CompetitorsWatch/SitePages/";
 const KEY_SUMMARY_URL = "https://dextranet.sharepoint.com/:x:/r/sites/CompetitorsWatch/Shared%20Documents/Key_Competitors_Summary.xlsx?d=w6a74cc0c557b49bc87f73c56406fe3a0&csf=1&web=1&e=DZy633";
 
