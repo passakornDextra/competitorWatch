@@ -333,7 +333,7 @@
     </div>
 
     <nav class="links">
-      <button class="nav-trigger" id="filtersTrigger" type="button" aria-expanded="false">
+      <button class="nav-trigger" id="filtersTrigger" type="button" aria-expanded="false" style="display:none">
         <span class="label-text">Filters</span>
         <span class="filter-count" id="filterCount" hidden>0</span>
         <span class="caret"></span>
@@ -352,8 +352,7 @@
     </nav>
   </div>
 
-  <!-- shared scrim for both panels -->
-  <div class="panel-scrim" id="panelScrim"></div>
+
 
   <!-- FILTERS PANEL (wraps your original, untouched control elements) -->
   <div class="panel" id="filtersPanel">
@@ -391,7 +390,10 @@
     <div class="panel-inner" id="panelInner"></div>
   </div>
 </header>
-
+  
+  <!-- shared scrim for both panels -->
+  <div class="panel-scrim" id="panelScrim"></div>
+  
 <main class="wrap">
   <div id="status" class="empty">Loading articles…</div>
   <div class="article-count" id="articleCount" hidden></div>
