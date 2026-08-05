@@ -293,9 +293,8 @@ header .wrap {
       .link { width: 100%; }
     }
     
-/* --- UNHIDE the dropdowns + search (your CSS currently hides them globally) --- */
-header .controls select,
-header .controls input[type="text"] {
+/* --- UNHIDE the dropdowns (your CSS currently hides them globally) --- */
+header .controls select {
   display: inline-block !important;
 }
 
@@ -349,8 +348,7 @@ header .controls {
 header .controls .control {
   display: inline-flex !important;
 }
-header .controls .control select,
-header .controls .control input[type="text"] {
+header .controls .control select {
   width: auto !important;                 /* prevent 100% width */
   padding: 6px 10px !important;           /* smaller boxes */
   font-size: 14px !important;
@@ -689,7 +687,6 @@ header .controls {
 }
 
 header .controls select,
-header .controls input[type="text"],
 header .controls button {
   background: #fff; /* Pure white */
   border: 1px solid #ccc;
@@ -1085,7 +1082,6 @@ header .controls button {
       
       <div class="control"><select id="line"><option value="">All Product Lines</option><option value="CRP">CRP</option><option value="Bars">Bars</option><option value="Geotec">Geotec</option></select></div>
       <div class="control"><select id="source"><option value="">All Companies</option></select></div>
-      <div class="control"><input type="text" id="search" placeholder="🔍 Search keyword..." /></div>
       <div class="control">
         <select id="sort">
           <option value="date_desc">📅 Newest First</option>
@@ -1093,6 +1089,8 @@ header .controls button {
           <option value="title_asc">🔤 Title A–Z</option>
           <option value="title_desc">🔤 Title Z–A</option>
         </select>
+      </div>
+    </div>
 
     
   </div>
@@ -1205,9 +1203,3 @@ header .controls button {
 </body>
 
 </html>
-
-
-
-
-
-
