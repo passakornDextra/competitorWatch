@@ -110,13 +110,7 @@
   }
   .panel.show{opacity:1; transform:translateY(0) scale(1); pointer-events:auto;}
 
-  #filtersPanel{ right:24px; margin-top:10px; width:320px; padding:20px; }
-  .filter-group{margin-bottom:16px;}
-  .filter-group:last-child{margin-bottom:0;}
-  .filter-label{
-    font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em;
-    color:var(--ink-faint); margin-bottom:8px; display:block;
-  }
+
   .filter-group select,
   .filter-group input[type="text"]{
     width:100%; font-family:inherit; font-size:14px; color:var(--ink);
@@ -313,7 +307,6 @@
   @media (max-width: 860px){
     .panel-inner{grid-template-columns:1fr; gap:28px; padding:28px 20px;}
     #competitorsPanel{left:12px; right:12px;}
-    #filtersPanel{right:12px; width:calc(100vw - 24px);}
   }
   @media (max-width: 640px){
     h1{font-size:15px;}
@@ -332,12 +325,7 @@
       <h1>Competitor News</h1>
     </div>
 
-    <nav class="links">
-      <button class="nav-trigger" id="filtersTrigger" type="button" aria-expanded="false">
-        <span class="label-text">Filters</span>
-        <span class="filter-count" id="filterCount" hidden>0</span>
-        <span class="caret"></span>
-      </button>
+
 
       <button class="nav-trigger" id="competitorsTrigger" type="button" aria-expanded="false">
         <span class="label-text">Competitors</span>
@@ -355,36 +343,6 @@
   <!-- shared scrim for both panels -->
   <div class="panel-scrim" id="panelScrim"></div>
 
-  <!-- FILTERS PANEL (wraps your original, untouched control elements) -->
-  <div class="panel" id="filtersPanel">
-    <div class="filter-group">
-      <label class="filter-label" for="line">Product Line</label>
-      <select id="line">
-        <option value="">All Product Lines</option>
-        <option value="CRP">CRP</option>
-        <option value="Bars">Bars</option>
-        <option value="Geotec">Geotec</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label class="filter-label" for="source">Company</label>
-      <select id="source"><option value="">All Companies</option></select>
-    </div>
-    <div class="filter-group">
-      <label class="filter-label" for="search">Keyword</label>
-      <input type="text" id="search" placeholder="Search keyword…" />
-    </div>
-    <div class="filter-group">
-      <label class="filter-label" for="sort">Sort</label>
-      <select id="sort">
-        <option value="date_desc">Newest first</option>
-        <option value="date_asc">Oldest first</option>
-        <option value="title_asc">Title A–Z</option>
-        <option value="title_desc">Title Z–A</option>
-      </select>
-    </div>
-    <button class="filter-reset" id="filterReset" type="button">Clear all filters</button>
-  </div>
 
   <!-- COMPETITORS MEGA PANEL -->
   <div class="panel" id="competitorsPanel">
