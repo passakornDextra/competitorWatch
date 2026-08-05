@@ -27,6 +27,7 @@
     }
     
   
+  
 
     * { box-sizing: border-box; }
     
@@ -142,7 +143,8 @@ header .wrap {
     .control { position: relative; }
     
 
-.controls .control select {
+.controls .control select,
+.controls .control input {
   padding: 6px 8px; /* Smaller boxes */
   font-size: 14px;
   border-radius: 6px;
@@ -150,13 +152,15 @@ header .wrap {
 }
 
 
-    .control select:hover {
+    .control select:hover,
+    .control input:hover {
       border-color: rgba(255, 255, 255, 0.6);
       transform: translateY(-1px);
       box-shadow: var(--shadow);
     }
     
-    .control select:focus { 
+    .control select:focus, 
+    .control input:focus { 
       border-color: #fff;
       background: #fff;
       box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.25), var(--shadow);
@@ -270,7 +274,7 @@ header .wrap {
       header .wrap { padding: 32px 16px 24px; }
       .title { font-size: 18px; }
       .summary { font-size: 15px; }
-      .control select { font-size: 16px; }
+      .control select, .control input { font-size: 16px; }
       #backToTop { bottom: 20px; right: 20px; padding: 16px 20px; font-size: 16px; }
     }
 
@@ -282,8 +286,9 @@ header .wrap {
       .link { width: 100%; }
     }
     
-/* --- UNHIDE the dropdowns (your CSS currently hides them globally) --- */
-header .controls select {
+/* --- UNHIDE the dropdowns + search (your CSS currently hides them globally) --- */
+header .controls select,
+header .controls input[type="text"] {
   display: inline-block !important;
 }
 
@@ -336,7 +341,8 @@ header .controls {
 header .controls .control {
   display: inline-flex !important;
 }
-header .controls .control select {
+header .controls .control select,
+header .controls .control input[type="text"] {
   width: auto !important;                 /* prevent 100% width */
   padding: 6px 10px !important;           /* smaller boxes */
   font-size: 14px !important;
@@ -675,6 +681,7 @@ header .controls {
 }
 
 header .controls select,
+header .controls input[type="text"],
 header .controls button {
   background: #fff; /* Pure white */
   border: 1px solid #ccc;
@@ -1076,6 +1083,7 @@ header .controls button {
       
       <div class="control"><select id="line"><option value="">All Product Lines</option><option value="CRP">CRP</option><option value="Bars">Bars</option><option value="Geotec">Geotec</option></select></div>
       <div class="control"><select id="source"><option value="">All Companies</option></select></div>
+      <div class="control"><input type="text" id="search" placeholder="🔍 Search keyword..." /></div>
       <div class="control">
         <select id="sort">
           <option value="date_desc">📅 Newest First</option>
@@ -1084,8 +1092,17 @@ header .controls button {
           <option value="title_desc">🔤 Title Z–A</option>
         </select>
       </div>
-    </div>
+       
+          <button class="btn-upload"
+        onclick="window.open('https://dextranet.sharepoint.com/:f:/r/sites/CompetitorsWatch/Shared%20Documents/03.%20Geotec/Geotec%20Competitor%20Files?csf=1&web=1&e=18KcVv', '_blank')">
+        📂 Drop Unlisted Competitors Files
+        </button>
+           
 
+
+
+
+    </div>
     
   </div>
 </header>
@@ -1200,3 +1217,6 @@ header .controls button {
 </body>
 
 </html>
+
+
+
