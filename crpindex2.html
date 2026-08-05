@@ -489,7 +489,7 @@ COMPETITOR_PAGES.forEach(d => { (byLineName[d.name] ||= []).push(d.line); });
 function buildCompetitorsPanel(){
   const inner = document.getElementById('panelInner');
   inner.innerHTML = '';
-  const lineTitles = { CRP:"CRP", Bars:"Bar Engineered Systems", Geotec:"Ground Engineering Solution" };
+  const lineTitles = { CRP:"CRP", Bars:"Engineered Bar Systems", Geotec:"Ground Engineering Solution" };
 
   ["CRP","Bars","Geotec"].forEach(line => {
     const col = document.createElement('div');
