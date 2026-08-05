@@ -27,7 +27,6 @@
     }
     
   
-  
 
     * { box-sizing: border-box; }
     
@@ -143,8 +142,7 @@ header .wrap {
     .control { position: relative; }
     
 
-.controls .control select,
-.controls .control input {
+.controls .control select {
   padding: 6px 8px; /* Smaller boxes */
   font-size: 14px;
   border-radius: 6px;
@@ -152,15 +150,13 @@ header .wrap {
 }
 
 
-    .control select:hover,
-    .control input:hover {
+    .control select:hover {
       border-color: rgba(255, 255, 255, 0.6);
       transform: translateY(-1px);
       box-shadow: var(--shadow);
     }
     
-    .control select:focus, 
-    .control input:focus { 
+    .control select:focus { 
       border-color: #fff;
       background: #fff;
       box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.25), var(--shadow);
@@ -274,7 +270,7 @@ header .wrap {
       header .wrap { padding: 32px 16px 24px; }
       .title { font-size: 18px; }
       .summary { font-size: 15px; }
-      .control select, .control input { font-size: 16px; }
+      .control select { font-size: 16px; }
       #backToTop { bottom: 20px; right: 20px; padding: 16px 20px; font-size: 16px; }
     }
 
@@ -286,9 +282,8 @@ header .wrap {
       .link { width: 100%; }
     }
     
-/* --- UNHIDE the dropdowns + search (your CSS currently hides them globally) --- */
-header .controls select,
-header .controls input[type="text"] {
+/* --- UNHIDE the dropdowns (your CSS currently hides them globally) --- */
+header .controls select {
   display: inline-block !important;
 }
 
@@ -341,8 +336,7 @@ header .controls {
 header .controls .control {
   display: inline-flex !important;
 }
-header .controls .control select,
-header .controls .control input[type="text"] {
+header .controls .control select {
   width: auto !important;                 /* prevent 100% width */
   padding: 6px 10px !important;           /* smaller boxes */
   font-size: 14px !important;
@@ -681,7 +675,6 @@ header .controls {
 }
 
 header .controls select,
-header .controls input[type="text"],
 header .controls button {
   background: #fff; /* Pure white */
   border: 1px solid #ccc;
@@ -1083,7 +1076,6 @@ header .controls button {
       
       <div class="control"><select id="line"><option value="">All Product Lines</option><option value="CRP">CRP</option><option value="Bars">Bars</option><option value="Geotec">Geotec</option></select></div>
       <div class="control"><select id="source"><option value="">All Companies</option></select></div>
-      <div class="control"><input type="text" id="search" placeholder="🔍 Search keyword..." /></div>
       <div class="control">
         <select id="sort">
           <option value="date_desc">📅 Newest First</option>
@@ -1091,6 +1083,8 @@ header .controls button {
           <option value="title_asc">🔤 Title A–Z</option>
           <option value="title_desc">🔤 Title Z–A</option>
         </select>
+      </div>
+    </div>
 
     
   </div>
@@ -1206,7 +1200,3 @@ header .controls button {
 </body>
 
 </html>
-
-
-
-
