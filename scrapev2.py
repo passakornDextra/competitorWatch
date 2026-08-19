@@ -5,6 +5,7 @@ from datetime import datetime
 import urllib3
 import re
 import time
+from email.utils import parsedate_to_datetime
 from deep_translator import GoogleTranslator
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -1106,11 +1107,6 @@ def scrape_williams_form():
 # ---- Configurable Source List ----
 
 
-
-
-
-
-
 def scrape_minova_apac_news():
     import re
     import requests
@@ -1174,7 +1170,7 @@ def scrape_minova_apac_news():
             raw = " ".join(a.stripped_strings)
             title = raw
 
-            image_url = listing_img  # ← prefer listing-card image you pointed out
+            image_url = listing_img  # prefer listing-card image you pointed out
 
             # If we still need title/summary/OG image, fetch article
             if not image_url or not title or len(title) < 8:
@@ -1449,6 +1445,406 @@ def scrape_splicesleeve_events():
 
     return events_data
 
+
+def scrape_armastek():
+    """
+    Scrapes SPC "Armastek" LTD news (composite/GFRP reinforcement manufacturer,
+    competitor in the Middle East/CIS region) from https://armastek.net/news/
+
+    Primary method: parse the WordPress category RSS feed (structured & stable,
+    unaffected by theme markup changes):
+        https://armastek.net/category/news/feed/
+    Fallback method: parse the HTML listing page directly in case the feed is
+    ever unavailable, using a "Read More" anchor-based heuristic (the site's
+    news listing uses "Read More" links per article, same as Moment Solutions
+    above).
+    """
+    base_url = "https://armastek.net"
+    feed_url = f"{base_url}/category/news/feed/"
+    listing_url = f"{base_url}/news/"
+    articles_data = []
+
+    # ---------- Primary: RSS feed ----------
+    try:
+        resp = requests.get(feed_url, headers=HEADERS, verify=False, timeout=30)
+        resp.raise_for_status()
+        soup = BeautifulSoup(resp.content, "xml")
+        items = soup.find_all("item")
+
+        for it in items:
+            title_tag = it.find("title")
+            title = title_tag.get_text(strip=True) if title_tag else ""
+
+            link_tag = it.find("link")
+            link = link_tag.get_text(strip=True) if link_tag else ""
+
+            # Date (RFC 822 pubDate, e.g. "Thu, 11 Jun 2026 00:00:00 +0000")
+            date_text = ""
+            article_date = None
+            pubdate_tag = it.find("pubDate")
+            if pubdate_tag:
+                date_text = pubdate_tag.get_text(strip=True)
+                try:
+                    article_date = parsedate_to_datetime(date_text)
+                except Exception:
+                    article_date = None
+            # Fallback: date embedded in the permalink (/YYYY/MM/DD/slug/)
+            if article_date is None and link:
+                m = re.search(r"/(\d{4})/(\d{2})/(\d{2})/", link)
+                if m:
+                    try:
+                        article_date = datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+                        date_text = date_text or article_date.strftime("%Y-%m-%d")
+                    except Exception:
+                        article_date = None
+
+            # Full content (used to pull the first image + as summary fallback)
+            content_tag = it.find("content:encoded") or it.find("encoded")
+            content_html = content_tag.get_text() if content_tag else ""
+
+            image_url = ""
+            if content_html:
+                csoup = BeautifulSoup(content_html, "html.parser")
+                img = csoup.find("img")
+                if img:
+                    image_url = img.get("src") or img.get("data-src") or ""
+                    if image_url.startswith("/"):
+                        image_url = urljoin(base_url, image_url)
+
+            # Description / excerpt
+            desc_tag = it.find("description")
+            summary = desc_tag.get_text(strip=True) if desc_tag else ""
+            if not summary and content_html:
+                csoup = BeautifulSoup(content_html, "html.parser")
+                p = csoup.find("p")
+                summary = p.get_text(strip=True) if p else ""
+
+            articles_data.append({
+                "Title": title,
+                "DateText": date_text,
+                "Date": article_date,
+                "Link": link,
+                "Image": image_url,
+                "Summary": summary,
+                "Source": "Armastek"
+            })
+
+        if articles_data:
+            return articles_data
+
+    except Exception:
+        pass  # fall through to HTML fallback
+
+    # ---------- Fallback: parse the HTML listing page ----------
+    try:
+        resp = requests.get(listing_url, headers=HEADERS, verify=False, timeout=30)
+        resp.raise_for_status()
+        soup = BeautifulSoup(resp.content, "html.parser")
+
+        read_more_links = soup.find_all(
+            "a",
+            string=lambda s: isinstance(s, str) and "read more" in s.lower()
+        )
+
+        DATE_PAT = re.compile(r"(\d{1,2}\s+[A-Za-z]+\s+\d{4})")
+
+        for a in read_more_links:
+            href = (a.get("href") or "").strip()
+            link = urljoin(base_url, href) if href else ""
+
+            # Walk up to find a container holding title/date/summary/img
+            container = a
+            for _ in range(6):
+                if not container or not getattr(container, "parent", None):
+                    break
+                container = container.parent
+                if container.find(["h1", "h2", "h3", "h4"]):
+                    break
+
+            title = ""
+            for tag in ["h1", "h2", "h3", "h4"]:
+                t = container.find(tag) if container else None
+                if t and t.get_text(strip=True):
+                    title = t.get_text(strip=True)
+                    break
+
+            date_text = ""
+            article_date = None
+            block_text = container.get_text(" ", strip=True) if container else ""
+            m = DATE_PAT.search(block_text)
+            if m:
+                date_text = m.group(1)
+                for fmt in ("%d %B %Y", "%d %b %Y"):
+                    try:
+                        article_date = datetime.strptime(date_text, fmt)
+                        break
+                    except Exception:
+                        continue
+
+            image_url = ""
+            img = container.find("img") if container else None
+            if img:
+                image_url = img.get("src") or img.get("data-src") or ""
+                if image_url.startswith("/"):
+                    image_url = urljoin(base_url, image_url)
+
+            summary = ""
+            if container:
+                p = container.find("p")
+                if p:
+                    summary = p.get_text(strip=True)
+
+            articles_data.append({
+                "Title": title,
+                "DateText": date_text,
+                "Date": article_date,
+                "Link": link,
+                "Image": image_url,
+                "Summary": summary,
+                "Source": "Armastek"
+            })
+
+        # De-dup by link
+        seen, deduped = set(), []
+        for item in articles_data:
+            if item["Link"] and item["Link"] not in seen:
+                deduped.append(item)
+                seen.add(item["Link"])
+        return deduped
+
+    except Exception:
+        return articles_data
+
+
+# ---- Sandvik Mining ----
+
+KNOWN_CATEGORIES = [
+    "Press releases (regulatory)",
+    "Press release",
+    "News",
+]
+
+DATE_PREFIX_RE = re.compile(
+    r"^(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2}:\d{2})\s*-\s*"
+)
+
+ARTICLE_LINK_RE = re.compile(r"/news-and-media/news-archive/\d{4}/\d{2}/")
+
+
+def scrape_sandvik_mining():
+
+    base_url = "https://www.mining.sandvik/en/news-and-media/news-archive/"
+
+    LOGO_URL = (
+        "https://raw.githubusercontent.com/"
+        "passakornDextra/competitorWatch/main/logos/Sandvik_16x9.png"
+    )
+
+    articles_data = []
+
+    try:
+        resp = requests.get(base_url, headers=HEADERS, verify=False, timeout=30)
+        resp.raise_for_status()
+
+        soup = BeautifulSoup(resp.text, "html.parser")
+
+        # 1) Find every article link in the results list.
+        #    The site renders each result as an <a href="...YYYY/MM/slug/">
+        #    wrapping the date, category, title and summary.
+        links = soup.find_all("a", href=ARTICLE_LINK_RE)
+
+        seen_hrefs = set()
+
+        for a in links:
+            href = a.get("href", "").strip()
+            if not href or href in seen_hrefs:
+                continue
+            seen_hrefs.add(href)
+
+            if href.startswith("/"):
+                href = "https://www.mining.sandvik" + href
+
+            title = None
+            summary = None
+            date_text = None
+            category = None
+
+            # 2) Prefer structural extraction: heading tag = title,
+            #    paragraph tag = summary, if the markup gives us that.
+            heading_tag = a.find(["h1", "h2", "h3", "h4", "h5"])
+            para_tag = a.find("p")
+
+            if heading_tag:
+                title = heading_tag.get_text(strip=True)
+            if para_tag:
+                summary = para_tag.get_text(strip=True)
+
+            full_text = " ".join(a.get_text(" ", strip=True).split())
+
+            # 3) Pull the leading "19 Aug 07:00 - " date/time prefix.
+            date_match = DATE_PREFIX_RE.match(full_text)
+            remainder = full_text
+            if date_match:
+                date_text = date_match.group(1)
+                remainder = full_text[date_match.end():]
+
+            # 4) Strip the known category label off the front of what's left.
+            for cat in KNOWN_CATEGORIES:
+                if remainder.startswith(cat):
+                    category = cat
+                    remainder = remainder[len(cat):].strip()
+                    break
+
+            # 5) If we didn't get title/summary structurally, fall back to
+            #    the text remainder as the title only (safer than guessing
+            #    a wrong split point between title and summary).
+            if not title:
+                title = remainder if not summary else remainder.replace(summary, "").strip()
+            if title:
+                title = title.strip()
+
+            # 6) Parse a real datetime from the URL year/month + day/month text.
+            article_date = None
+            try:
+                url_match = re.search(r"/(\d{4})/(\d{2})/", href)
+                if url_match and date_text:
+                    year = url_match.group(1)
+                    day_month = re.search(r"(\d{1,2}\s+[A-Za-z]+)", date_text)
+                    if day_month:
+                        article_date = datetime.strptime(
+                            f"{day_month.group(1)} {year}", "%d %b %Y"
+                        )
+            except Exception:
+                pass
+
+            articles_data.append({
+                "Title": title,
+                "DateText": date_text,
+                "Date": article_date,
+                "Link": href,
+                "Image": LOGO_URL,
+                "Summary": summary,
+                "Source": "Sandvik Mining",
+            })
+
+        return articles_data
+
+    except Exception as e:
+        print(f"Sandvik Mining scraper error: {e}")
+        return []
+
+
+# ---- Jennmar ----
+# NOTE: regexes are defined *inside* the function (not at module level) so
+# they can never again silently get dropped when copy-pasting into a
+# combined scraper file, like happened last time.
+
+def scrape_jennmar():
+
+    DATE_RE = re.compile(r"^\d{1,2}\s+[A-Za-z]{3}\s+\d{4}$")
+    ARTICLE_HREF_RE = re.compile(r"^/news/[a-z0-9\-]+/?$", re.IGNORECASE)
+
+    base_url = "https://www.jennmar.com/news"
+
+    LOGO_URL = (
+        "https://raw.githubusercontent.com/"
+        "passakornDextra/competitorWatch/main/logos/Jennmar_16x9.png"
+    )
+
+    articles_data = []
+
+    try:
+        resp = requests.get(base_url, headers=HEADERS, verify=False, timeout=30)
+        resp.raise_for_status()
+
+        soup = BeautifulSoup(resp.text, "html.parser")
+
+        # Each article's "Learn More" link points to the real article URL
+        # (e.g. /news/jennmar-acquires-weber-mining-tunnelling). We match on
+        # the href pattern rather than the link text ("Learn More" is often
+        # wrapped in a nested <span>, which breaks a string= text match),
+        # then walk up to its card container to pull the date, title (h3)
+        # and summary (p) that sit alongside it.
+        all_links = soup.find_all("a", href=True)
+        seen_hrefs = set()
+
+        for link in all_links:
+            raw_href = link.get("href", "").strip()
+            if not raw_href:
+                continue
+
+            # Normalize to a path for matching, then build the full URL.
+            path = raw_href
+            if path.startswith("https://www.jennmar.com"):
+                path = path[len("https://www.jennmar.com"):]
+            elif path.startswith("http"):
+                continue  # external link, skip
+
+            if not ARTICLE_HREF_RE.match(path):
+                continue
+
+            href = "https://www.jennmar.com" + path
+            if href in seen_hrefs:
+                continue
+            seen_hrefs.add(href)
+
+            # Walk up to the nearest ancestor that also contains the
+            # heading + date + summary for this same article card.
+            container = link.parent
+            depth = 0
+            heading_tag = None
+            while container and depth < 6:
+                heading_tag = container.find(["h1", "h2", "h3", "h4"])
+                if heading_tag:
+                    break
+                container = container.parent
+                depth += 1
+
+            if not container:
+                continue
+
+            title = heading_tag.get_text(strip=True) if heading_tag else None
+
+            # Summary: first <p> in the container that isn't the date line.
+            summary = None
+            for p in container.find_all("p"):
+                text = p.get_text(strip=True)
+                if text and not DATE_RE.match(text):
+                    summary = text
+                    break
+
+            # Date: look for a short text node matching "16 Jun 2026" pattern
+            # anywhere in the container.
+            date_text = None
+            for text_node in container.stripped_strings:
+                if DATE_RE.match(text_node):
+                    date_text = text_node
+                    break
+
+            article_date = None
+            if date_text:
+                try:
+                    article_date = datetime.strptime(date_text, "%d %b %Y")
+                except Exception:
+                    pass
+
+            articles_data.append({
+                "Title": title,
+                "DateText": date_text,
+                "Date": article_date,
+                "Link": href,
+                "Image": LOGO_URL,
+                "Summary": summary,
+                "Source": "Jennmar",
+            })
+
+        return articles_data
+
+    except Exception as e:
+        print(f"Jennmar scraper error: {e}")
+        return []
+
+
 COMPETITOR_SOURCES = [
     ("Ancon", scrape_ancon),
     ("nVent LENTON", scrape_nvent_lenton),
@@ -1456,14 +1852,17 @@ COMPETITOR_SOURCES = [
     ("Anker Schroeder", scrape_anker_schroeder),
     ("SAH Annahutte", scrape_annahutte_selenium_all),
     ("Moment", scrape_moment_latest_news),
-    ("Macalloy",  scrape_macalloy),
+    ("Macalloy", scrape_macalloy),
     ("Williams Form", scrape_williams_form),
-    ("FiReP Minova",scrape_minova_apac_news),
-    ("MST Bar",scrape_tagembed_widget_headless),
+    ("FiReP Minova", scrape_minova_apac_news),
+    ("MST Bar", scrape_tagembed_widget_headless),
     ("Mateenbar Pultron", scrape_mateenbar_and_pultron),
-    ("nmb splice sleeve",scrape_splicesleeve_events),
+    ("nmb splice sleeve", scrape_splicesleeve_events),
     ("linxion", linxion_scrape),
-    ("peikko", scrape_peikko)
+    ("peikko", scrape_peikko),
+    ("Armastek", scrape_armastek),
+    ("Sandvik Mining", scrape_sandvik_mining),
+    ("Jennmar", scrape_jennmar)
 ]
 
 def scrape_with_status(scrape_func, site_name):
@@ -1558,7 +1957,7 @@ def scrape_all_and_export_csv():
     for name, func in COMPETITOR_SOURCES:
         data, status = scrape_with_status(func, name)
 
-        # 🔥 Translate Annahütte just before adding
+        # Translate Annahütte just before adding
         if name == "SAH Annahutte":
             for article in data:
                 try:
@@ -1575,7 +1974,7 @@ def scrape_all_and_export_csv():
         status_list.append(status)
 
     df = pd.DataFrame(all_articles)
-    df = _normalize_and_sort_dates(df)   # ← date-only normalization & sorting
+    df = _normalize_and_sort_dates(df)   # date-only normalization & sorting
     df.to_csv("export_combined.csv", index=False, encoding="utf-8-sig")
 
     df_status = pd.DataFrame(status_list)
