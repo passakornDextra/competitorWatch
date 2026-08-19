@@ -38,7 +38,10 @@
     "mateenbar": "Mateenbar_16x9.png",
     "mst bar": "MST_Bar_16x9.png",
     "linxion": "linxion_16x9.png",
-    "peikko": "PeikkoGroup_16x9.png"
+    "peikko": "PeikkoGroup_16x9.png",
+    "sandvik mining": "Sandvik_16x9.png",
+    "jennmar": "Jennmar_16x9.png",
+    "armastek": "Armastek_16x9.png"
   };
 
   /* --- Aliases coming from CSV (normalize to canonical) --- */
@@ -81,6 +84,9 @@
     "firep minova": ["Geotec"],
     "peikko": ["CRP"],
     "linxion": ["CRP"],
+    "sandvik mining": ["Geotec"],
+    "jennmar": ["Geotec"],
+    "armastek": ["Geotec"]
   };
 
   /* --- Display name mapping (what the user sees) --- */
@@ -101,7 +107,9 @@
     "boowon bms": "Boowon BMS",
     "peikko": "Peikko",
     "linxion": "Linxion",
-    "nmb splice sleeve": "NMB Splice Sleeve"
+    "sandvik mining": "Sandvik Mining",
+    "jennmar": "Jennmar",
+    "armastek": "Armastek"
   };
 
   function displayFor(canon) {
