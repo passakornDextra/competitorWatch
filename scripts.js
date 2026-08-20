@@ -63,6 +63,8 @@
     "mst-bar": "mst bar",
     "sah annahutte": "stahlwerk annahutte",
     "stahlwerk annahuette": "stahlwerk annahutte",
+    "pultron mateenbar": "mateenbar",
+    "mateenbar pultron": "mateenbar",
 
   };
 
@@ -102,14 +104,15 @@
     "macalloy": "Macalloy",
     "williams form": "Williams Form",
     "nmb splice sleeve": "NMB Splice Sleeve",
-    "mateenbar": "Mateenbar",
+    "mateenbar": "Pultron Mateenbar",
     "mst bar": "MST Bar",
     "boowon bms": "Boowon BMS",
     "peikko": "Peikko",
     "linxion": "Linxion",
     "sandvik mining": "Sandvik Mining",
     "jennmar": "Jennmar",
-    "armastek": "Armastek"
+    "armastek": "Armastek",
+
   };
 
   function displayFor(canon) {
