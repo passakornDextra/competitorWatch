@@ -41,7 +41,7 @@
     "peikko": "PeikkoGroup_16x9.png",
     "sandvik": "Sandvik_16x9.png",
     "jennmar": "Jennmar_16x9.png",
-    "armastek": "Armastek_16x9.png"
+    "armastek": "Armastek_16x9.png",
     "julisling": "Julisling_16x9.png",
   };
 
