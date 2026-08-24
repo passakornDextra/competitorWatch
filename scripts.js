@@ -39,9 +39,10 @@
     "mst bar": "MST_Bar_16x9.png",
     "linxion": "linxion_16x9.png",
     "peikko": "PeikkoGroup_16x9.png",
-    "sandvik mining": "Sandvik_16x9.png",
+    "sandvik": "Sandvik_16x9.png",
     "jennmar": "Jennmar_16x9.png",
     "armastek": "Armastek_16x9.png"
+    "julisling": "Julisling_16x9.png",
   };
 
   /* --- Aliases coming from CSV (normalize to canonical) --- */
@@ -65,6 +66,7 @@
     "stahlwerk annahuette": "stahlwerk annahutte",
     "pultron mateenbar": "mateenbar",
     "mateenbar pultron": "mateenbar",
+    "sandvik mining": "sandvik"
 
   };
 
@@ -79,6 +81,7 @@
     "anker schroeder": ["Bars"],
     "macalloy": ["Bars"],
     "williams form": ["Bars"],
+    "julisling": ["Bars"],
     "stahlwerk annahutte": ["Bars", "Geotec"],
     "sah": ["Bars", "Geotec"],
     "mateenbar": ["Geotec"],
@@ -86,7 +89,7 @@
     "firep minova": ["Geotec"],
     "peikko": ["CRP"],
     "linxion": ["CRP"],
-    "sandvik mining": ["Geotec"],
+    "sandvik": ["Geotec"],
     "jennmar": ["Geotec"],
     "armastek": ["Geotec"]
   };
@@ -109,9 +112,10 @@
     "boowon bms": "Boowon BMS",
     "peikko": "Peikko",
     "linxion": "Linxion",
-    "sandvik mining": "Sandvik Mining",
+    "sandvik": "Sandvik",
     "jennmar": "Jennmar",
     "armastek": "Armastek",
+    "julisling": "Julisling",
 
   };
 
