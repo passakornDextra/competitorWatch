@@ -1844,6 +1844,132 @@ def scrape_jennmar():
         print(f"Jennmar scraper error: {e}")
         return []
 
+def scrape_julisling():
+ 
+    # e.g. "Sep. 04, 2025" / "Jul. 04, 2025" / "Jan. 16, 2025"
+    DATE_RE = re.compile(r"^[A-Za-z]{3}\.\s+\d{1,2},\s+\d{4}$")
+ 
+    # Article pages live at /news/<slug>.html. Slugs can contain commas,
+    # colons, and periods (titles are slugified as-is), so we only exclude
+    # the paginator pages (/news/index_2.html etc.) and require the path
+    # to start with /news/ and end in .html.
+    ARTICLE_HREF_RE = re.compile(r"^/news/(?!index_\d+\.html$)[^/]+\.html$", re.IGNORECASE)
+ 
+    base_url = "https://www.julislings.com/news/"
+ 
+    LOGO_URL = (
+        "https://raw.githubusercontent.com/"
+        "passakornDextra/competitorWatch/main/logos/Julisling_16x9.png"
+    )
+ 
+    articles_data = []
+ 
+    try:
+        resp = requests.get(base_url, headers=HEADERS, verify=False, timeout=30)
+        resp.raise_for_status()
+ 
+        soup = BeautifulSoup(resp.text, "html.parser")
+ 
+        # Each article card has an image link, a title link, and a summary
+        # link all pointing to the same /news/<slug>.html page. We match on
+        # the href pattern (there's no reliable "Read More" text match since
+        # it repeats across every card without distinguishing content), then
+        # walk up to the nearest ancestor that also holds the date + title +
+        # summary for that same card.
+        all_links = soup.find_all("a", href=True)
+        seen_hrefs = set()
+ 
+        for link in all_links:
+            raw_href = link.get("href", "").strip()
+            if not raw_href:
+                continue
+ 
+            path = raw_href
+            if path.startswith("https://www.julislings.com"):
+                path = path[len("https://www.julislings.com"):]
+            elif path.startswith("http"):
+                continue  # external link, skip
+ 
+            if not ARTICLE_HREF_RE.match(path):
+                continue
+ 
+            href = "https://www.julislings.com" + path
+            if href in seen_hrefs:
+                continue
+            seen_hrefs.add(href)
+ 
+            # Walk up to the nearest ancestor that also contains the
+            # heading for this same article card.
+            container = link.parent
+            depth = 0
+            heading_tag = None
+            while container and depth < 6:
+                heading_tag = container.find(["h1", "h2", "h3", "h4"])
+                if heading_tag:
+                    break
+                container = container.parent
+                depth += 1
+ 
+            # Title: prefer the heading tag; fall back to this link's own
+            # text/title attribute if no heading was found in the walk-up
+            # (the title link itself may not be wrapped in a heading tag).
+            if heading_tag:
+                title = heading_tag.get_text(strip=True)
+            else:
+                title = link.get_text(strip=True) or link.get("title", "").strip()
+                container = link.parent  # reset for date/summary search below
+ 
+            if not container:
+                continue
+ 
+            # Summary: first <p> or <a> text in the container that isn't
+            # the date line and isn't just the title repeated.
+            summary = None
+            for p in container.find_all(["p", "a"]):
+                text = p.get_text(strip=True)
+                if text and not DATE_RE.match(text) and text != title and text.lower() != "read more":
+                    summary = text
+                    break
+ 
+            # Date: look for a short text node matching "Sep. 04, 2025".
+            date_text = None
+            for text_node in container.stripped_strings:
+                if DATE_RE.match(text_node):
+                    date_text = text_node
+                    break
+ 
+            article_date = None
+            if date_text:
+                try:
+                    article_date = datetime.strptime(date_text, "%b. %d, %Y")
+                except Exception:
+                    pass
+ 
+            # Image: first <img> src within the container, if present.
+            img_tag = container.find("img")
+            image_url = None
+            if img_tag and img_tag.get("src"):
+                src = img_tag["src"].strip()
+                if src.startswith("http"):
+                    image_url = src
+                elif src.startswith("/"):
+                    image_url = "https://www.julislings.com" + src
+ 
+            articles_data.append({
+                "Title": title,
+                "DateText": date_text,
+                "Date": article_date,
+                "Link": href,
+                "Image": image_url or LOGO_URL,
+                "Summary": summary,
+                "Source": "Julisling",
+            })
+ 
+        return articles_data
+ 
+    except Exception as e:
+        print(f"Julisling scraper error: {e}")
+        return []
 
 COMPETITOR_SOURCES = [
     ("Ancon", scrape_ancon),
@@ -1862,7 +1988,8 @@ COMPETITOR_SOURCES = [
     ("peikko", scrape_peikko),
     ("Armastek", scrape_armastek),
     ("Sandvik Mining", scrape_sandvik_mining),
-    ("Jennmar", scrape_jennmar)
+    ("Jennmar", scrape_jennmar),
+    ("Julisling", scrape_julisling)
 ]
 
 def scrape_with_status(scrape_func, site_name):
