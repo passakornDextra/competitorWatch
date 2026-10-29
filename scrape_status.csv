@@ -2,7 +2,7 @@
 Ancon,success,9
 nVent LENTON,success,11
 Dywidag,success,12
-Anker Schroeder,success,15
+Anker Schroeder,error: 500 Server Error: Internal Server Error for url: https://www.anker.de/en/news,0
 SAH Annahutte,success,6
 Moment,success,45
 Macalloy,success,20
