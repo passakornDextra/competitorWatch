@@ -2,7 +2,7 @@
 Ancon,success,9
 nVent LENTON,success,11
 Dywidag,success,12
-Anker Schroeder,error: 500 Server Error: Internal Server Error for url: https://www.anker.de/en/news,0
+Anker Schroeder,success,15
 SAH Annahutte,success,6
 Moment,success,45
 Macalloy,success,20
@@ -14,7 +14,7 @@ MST Bar,"error: Playwright is required. Install with:
 Mateenbar Pultron,success,23
 nmb splice sleeve,success,8
 linxion,success,6
-peikko,success,37
+peikko,success,36
 Armastek,success,8
 Sandvik Mining,success,15
 Jennmar,success,4
