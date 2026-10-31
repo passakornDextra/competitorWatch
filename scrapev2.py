@@ -1984,7 +1984,6 @@ COMPETITOR_SOURCES = [
     ("MST Bar", scrape_tagembed_widget_headless),
     ("Mateenbar Pultron", scrape_mateenbar_and_pultron),
     ("nmb splice sleeve", scrape_splicesleeve_events),
-    ("linxion", linxion_scrape),
     ("peikko", scrape_peikko),
     ("Armastek", scrape_armastek),
     ("Sandvik Mining", scrape_sandvik_mining),
