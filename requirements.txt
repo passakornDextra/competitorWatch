@@ -4,3 +4,4 @@ lxml
 pandas
 deep-translator
 selenium
+playwright

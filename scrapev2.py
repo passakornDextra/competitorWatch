@@ -1115,7 +1115,8 @@ def scrape_minova_apac_news():
     from datetime import datetime
 
     base_url = "https://www.minovaglobal.com"
-    url = f"{base_url}/apac/news"
+    # /apac/news now 301-redirects to the global WordPress (Divi) listing at /news/
+    url = f"{base_url}/news/"
     headers = globals().get("HEADERS", {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                       "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -1125,91 +1126,38 @@ def scrape_minova_apac_news():
     r.raise_for_status()
     soup = BeautifulSoup(r.text, "html.parser")
 
-    link_re = re.compile(r"/apac/news/(\d{4}-\d{2}-\d{2})/")
-
-    def abs_url(src: str) -> str:
-        if not src:
-            return ""
-        s = src.strip()
-        # handle srcset: "url 1200w, url2 600w"
-        if "," in s and " " in s:
-            s = s.split(",")[0].strip().split()[0]
-        s = urljoin(base_url, s)
-        return s.replace(" ", "%20")
-
-    def get_listing_img(a):
-        # Prefer the card image inside the anchor
-        img = a.select_one("img.object-cover") or a.find("img")
-        if not img:
-            return ""
-        return abs_url(img.get("src") or img.get("data-src") or img.get("srcset") or img.get("data-srcset") or "")
-
-    # Collect (a_tag, full_url, date_from_url, listing_img)
-    items = []
-    seen = set()
-    for a in soup.select('a[href^="/apac/news/"], a[href*="/apac/news/"]'):
-        href = (a.get("href") or "").strip()
-        if not href:
-            continue
-        full = urljoin(base_url, href)
-        m = link_re.search(full)
-        if not m or full in seen:
-            continue
-        seen.add(full)
-        durl = m.group(1)  # YYYY-MM-DD
-        items.append((a, full, durl, get_listing_img(a)))
-
     out = []
-    for a, link, durl, listing_img in items:
+    seen = set()
+    for art in soup.select("article.et_pb_post"):
         try:
-            # date from URL
-            dt = datetime.strptime(durl, "%Y-%m-%d")
-            date_text = dt.strftime("%B %d, %Y")
+            a = art.select_one("h2.entry-title a") or art.select_one("a.entry-featured-image-url")
+            if not a or not a.get("href"):
+                continue
+            link = urljoin(base_url, a["href"].strip())
+            if link in seen:
+                continue
+            seen.add(link)
+            title = a.get_text(" ", strip=True)
 
-            # title from link text (fallback to article H1 later)
-            raw = " ".join(a.stripped_strings)
-            title = raw
+            pub = art.select_one(".post-meta .published")
+            dt = datetime.strptime(pub.get_text(strip=True), "%b %d, %Y") if pub else None
+            date_text = dt.strftime("%B %d, %Y") if dt else ""
 
-            image_url = listing_img  # prefer listing-card image you pointed out
+            img = art.find("img")
+            # src is a lazy-load SVG placeholder; real image is in data-src
+            image_url = urljoin(base_url, (img.get("data-src") or "").strip()) if img and img.get("data-src") else ""
 
-            # If we still need title/summary/OG image, fetch article
-            if not image_url or not title or len(title) < 8:
-                d = requests.get(link, headers=headers, timeout=30, verify=False)
-                if d.ok:
-                    ds = BeautifulSoup(d.text, "html.parser")
-                    if not title:
-                        h1 = ds.find("h1")
-                        if h1 and h1.get_text(strip=True):
-                            title = h1.get_text(strip=True)
-                    if not image_url:
-                        og = ds.find("meta", attrs={"property": "og:image"})
-                        if og and og.get("content"):
-                            image_url = abs_url(og["content"])
-                        else:
-                            img = ds.select_one("main img, article img, .prose img, .content img, img.object-cover")
-                            if img:
-                                image_url = abs_url(img.get("srcset") or img.get("src") or "")
-
-                    # short summary
-                    desc = ds.find("meta", attrs={"name": "description"})
-                    summary = (desc.get("content").strip() if desc and desc.get("content") else "")
-                    if not summary:
-                        p = ds.select_one("main p, article p, .prose p, .content p")
-                        if p:
-                            summary = p.get_text(" ", strip=True)
-                    if summary and len(summary) > 280:
-                        summary = summary[:277] + "…"
-                else:
-                    summary = ""
-            else:
-                summary = ""
+            p = art.select_one(".post-content p")
+            summary = p.get_text(" ", strip=True) if p else ""
+            if summary and len(summary) > 280:
+                summary = summary[:277] + "…"
 
             out.append({
-                "Title": title or "",
+                "Title": title,
                 "DateText": date_text,
                 "Date": dt,
                 "Link": link,
-                "Image": image_url or "",
+                "Image": image_url,
                 "Summary": summary,
                 "Source": "FiReP Minova"
             })
@@ -1248,6 +1196,15 @@ def scrape_tagembed_widget_headless(
     def map_feeds(feeds):
         out = []
         for f in feeds:
+            if isinstance(f.get("content"), dict):  # newer Tagembed API schema (body.Posts)
+                c, au, md = f["content"], f.get("author") or {}, f.get("media") or {}
+                f = {
+                    "postContent": c.get("text") or c.get("title") or "",
+                    "postAuthorName": au.get("name") or au.get("username") or c.get("feedName") or "",
+                    "postMediaFile": (md.get("image") or {}).get("large") or "",
+                    "postUrl": f.get("link") or "",
+                    "postCreatedAt": f.get("createdAt"),
+                }
             content = (f.get("postContent") or "").strip()
             author  = f.get("postAuthorName") or f.get("postUsername") or f.get("feedName") or ""
             network = f.get("networkName") or ""
@@ -1312,7 +1269,8 @@ def scrape_tagembed_widget_headless(
             except Exception:
                 return
             # Expect structure: {"body": {"feeds": [...]}}
-            feeds = (j.get("body") or {}).get("feeds")
+            body = j.get("body") or {}
+            feeds = body.get("feeds") or body.get("Posts")
             if not feeds:
                 return
             # De-dupe batches by a simple hash of feed IDs + count
