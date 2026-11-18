@@ -1,6 +1,6 @@
 ﻿Site,Status,ArticlesFound
 Ancon,success,9
-nVent LENTON,success,11
+nVent LENTON,error: 404 Client Error: Not Found for url: https://blog.nvent.com/category/lenton/,0
 Dywidag,success,12
 Anker Schroeder,success,15
 SAH Annahutte,success,6
