@@ -1,6 +1,6 @@
 ﻿Site,Status,ArticlesFound
 Ancon,success,9
-nVent LENTON,success,1
+nVent LENTON,error: 403 Client Error: Forbidden for url: https://www.nvent.com/insights,0
 Dywidag,success,12
 Anker Schroeder,success,15
 SAH Annahutte,success,6
